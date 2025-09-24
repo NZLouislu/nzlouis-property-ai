@@ -356,21 +356,66 @@ const Properties: React.FC = () => {
                       color: "inherit",
                     }}
                   >
-                    <div
-                      style={{
-                        height: "220px",
-                        backgroundImage:
-                          "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#4a5568",
-                        fontSize: "16px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      View Property
-                    </div>
+                    {property.cover_image_url ? (
+                      <img
+                        src={property.cover_image_url}
+                        alt={property.address}
+                        style={{
+                          width: "100%",
+                          height: "220px",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          height: "220px",
+                          background:
+                            "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#4a5568",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                          position: "relative",
+                        }}
+                      >
+                        <div
+                          style={{
+                            backgroundColor: "#e2e8f0",
+                            width: "80%",
+                            height: "70%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: "8px",
+                            border: "2px dashed #94a3b8",
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: "#64748b",
+                              fontSize: "14px",
+                              fontWeight: "500",
+                            }}
+                          >
+                            No Image Available
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            marginTop: "12px",
+                            color: "#475569",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                          }}
+                        >
+                          Default Property Image
+                        </div>
+                      </div>
+                    )}
                   </a>
                   <div
                     style={{
