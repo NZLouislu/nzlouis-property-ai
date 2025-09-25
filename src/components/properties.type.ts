@@ -29,4 +29,5 @@ export interface Property {
   improvement_value: number;
   has_rental_history: boolean;
   is_currently_rented: boolean;
+  cover_image_url?: string; // 添加 cover_image_url 字段
 }
