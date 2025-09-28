@@ -24,10 +24,14 @@ export async function GET(request: Request) {
       .range(page * pageSize, (page + 1) * pageSize - 1);
 
     // Apply filter only when suburbs is not empty and does not contain empty string
-    if (suburbs.length > 0 && suburbs[0] !== "") {
-      query = query.in("suburb", suburbs);
+    // Filter out any empty strings in the suburbs array
+    const filteredSuburbs = suburbs.filter((suburb) => suburb.trim() !== "");
+    
+    if (filteredSuburbs.length > 0) {
+      query = query.in("suburb", filteredSuburbs);
     }
 
+    // 设置查询超时（可选）
     const { data, error } = await query;
 
     if (error) {
