@@ -31,7 +31,6 @@ export async function GET(request: Request) {
       query = query.in("suburb", filteredSuburbs);
     }
 
-    // 设置查询超时（可选）
     const { data, error } = await query;
 
     if (error) {
