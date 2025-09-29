@@ -15,8 +15,6 @@ export async function GET(request: Request) {
   const suburbs = searchParams.get("suburbs")?.split(",") || [];
 
   try {
-    console.log("Fetching forecast properties for city:", city);
-
     let query = supabase
       .from("properties_with_latest_status")
       .select("*")
@@ -31,6 +29,16 @@ export async function GET(request: Request) {
       query = query.in("suburb", filteredSuburbs);
     }
 
+    // Log the approximate SQL query for debugging
+    let sqlQuery = `SELECT * FROM properties_with_latest_status WHERE city = '${city}'`;
+    
+    if (filteredSuburbs.length > 0) {
+      const suburbsList = filteredSuburbs.map(s => `'${s}'`).join(', ');
+      sqlQuery += ` AND suburb IN (${suburbsList})`;
+    }
+    
+    sqlQuery += ` LIMIT ${pageSize} OFFSET ${page * pageSize}`;
+    
     const { data, error } = await query;
 
     if (error) {
@@ -41,7 +49,6 @@ export async function GET(request: Request) {
       );
     }
 
-    console.log("Fetched forecast properties count:", data?.length || 0);
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error in fetchForecastProperties:", error);

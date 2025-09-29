@@ -5,12 +5,13 @@ import { usePropertiesData } from "@/src/hooks/usePropertiesData";
 import { Property } from "@/src/components/properties.type";
 import PropertyList from "@/src/components/Properties/PropertyList";
 import { FaSearch } from "react-icons/fa";
+import LocationSelector from "@/src/components/LocationSelector";
 
 export default function PropertyPage() {
   const lastPropertyElementRef = useRef<HTMLDivElement>(null);
-  const [selectedRegion, setSelectedRegion] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-  const [selectedSuburb, setSelectedSuburb] = useState<string>("");
+  const [selectedRegion, setSelectedRegion] = useState("Wellington");
+  const [selectedCity, setSelectedCity] = useState("Wellington City");
+  const [selectedSuburb, setSelectedSuburb] = useState<string>("all-suburbs");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
@@ -22,7 +23,7 @@ export default function PropertyPage() {
     error,
     fetchNextPage,
     hasNextPage,
-  } = usePropertiesData(selectedCity, [selectedSuburb]);
+  } = usePropertiesData(selectedCity, selectedSuburb === "all-suburbs" ? [] : [selectedSuburb]);
 
   const propertiesData = data as { pages: Property[][] } | undefined;
 
@@ -47,40 +48,16 @@ export default function PropertyPage() {
     ? propertiesData.pages.flatMap((page) => page)
     : [];
 
-  const regions = [
-    { 
-      name: "Auckland", 
-      cities: [
-        "Auckland - City",
-        "Auckland - Franklin",
-        "Auckland - Manukau",
-        "Auckland - North Shore",
-        "Auckland - Papakura",
-        "Auckland - Rodney",
-        "Auckland - Waitakere"
-      ]
-    },
-    { 
-      name: "Wellington", 
-      cities: [
-        "Carterton District",
-        "Kapiti Coast District",
-        "Lower Hutt City",
-        "Masterton District",
-        "Porirua City",
-        "South Wairarapa District",
-        "Upper Hutt City",
-        "Wellington City"
-      ]
-    }
-  ];
-
-  const getCitiesForRegion = () => {
-    const region = regions.find(r => r.name === selectedRegion);
-    return region ? region.cities : [];
+  const handleLocationChange = (selection: { 
+    region: string; 
+    city: string; 
+    suburb: string 
+  }) => {
+    setSelectedRegion(selection.region);
+    setSelectedCity(selection.city);
+    setSelectedSuburb(selection.suburb);
   };
 
-  // Filter properties based on search query
   const filteredProperties: Property[] = properties.filter((property) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -151,63 +128,14 @@ export default function PropertyPage() {
           />
         </div>
 
-        <select
-          value={selectedRegion}
-          onChange={(e) => {
-            setSelectedRegion(e.target.value);
-            setSelectedCity("");
-            setSelectedSuburb("");
-          }}
-          style={{
-            padding: "14px 18px",
-            borderRadius: "10px",
-            border: "2px solid #e2e8f0",
-            fontSize: "16px",
-            minWidth: "220px",
-            backgroundColor: "#fff",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-            transition: "all 0.2s",
-            cursor: "pointer",
-          }}
-        >
-          <option value="">Select Region</option>
-          {regions.map((region) => (
-            <option key={region.name} value={region.name}>
-              {region.name}
-            </option>
-          ))}
-        </select>
-
-        {selectedRegion && (
-          <select
-            value={selectedCity}
-            onChange={(e) => {
-              setSelectedCity(e.target.value);
-              setSelectedSuburb("");
-            }}
-            style={{
-              padding: "14px 18px",
-              borderRadius: "10px",
-              border: "2px solid #e2e8f0",
-              fontSize: "16px",
-              minWidth: "220px",
-              backgroundColor: "#fff",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-              transition: "all 0.2s",
-              cursor: "pointer",
-            }}
-          >
-            <option value="">Select City</option>
-            {getCitiesForRegion().map((city) => (
-              <option key={city} value={city}>
-                {city}
-              </option>
-            ))}
-          </select>
-        )}
+        <LocationSelector 
+          onSelectionChange={handleLocationChange}
+          defaultRegion="Wellington"
+          defaultCity="Wellington City"
+          defaultSuburb="all-suburbs"
+        />
       </div>
 
-      {/* Error message display */}
       {isError && (
         <div style={{
           padding: "16px",

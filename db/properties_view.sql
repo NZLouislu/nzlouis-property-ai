@@ -1,33 +1,37 @@
 -- Create optimized properties view for common query patterns
 -- This view includes commonly used fields and creates indexes for city and suburb fields
 
+-- View for property data optimization
+-- This view is used by the property API to fetch property information efficiently
+
 CREATE OR REPLACE VIEW properties_view AS
 SELECT 
-  id,
-  address,
-  suburb,
-  city,
-  postcode,
-  year_built,
-  bedrooms,
-  bathrooms,
-  car_spaces,
-  floor_size,
-  land_area,
-  last_sold_price,
-  last_sold_date,
-  capital_value,
-  land_value,
-  improvement_value,
-  has_rental_history,
-  is_currently_rented,
-  status,
-  property_history,
-  normalized_address,
-  property_url,
-  created_at,
-  region,
-  cover_image_url
+    id,
+    property_url,
+    last_sold_price,
+    address,
+    suburb,
+    city,
+    postcode,
+    year_built,
+    bedrooms,
+    bathrooms,
+    car_spaces,
+    floor_size,
+    land_area,
+    last_sold_price,
+    last_sold_date,
+    capital_value,
+    land_value,
+    improvement_value,
+    has_rental_history,
+    is_currently_rented,
+    status,
+    property_history,
+    normalized_address,
+    created_at,
+    region,
+    cover_image_url
 FROM properties
 ORDER BY id;
 
