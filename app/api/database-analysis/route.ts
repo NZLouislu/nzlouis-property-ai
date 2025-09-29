@@ -11,10 +11,9 @@ export async function GET() {
   try {
     console.log("Starting database analysis");
 
-
     // Test basic table access without filters
     const { count: totalCount, error: totalError } = await supabase
-      .from('properties')
+      .from('properties_view')
       .select('*', { count: 'exact' })
       .limit(0);
 
@@ -25,7 +24,7 @@ export async function GET() {
       console.log("Trying with city filter...");
       console.log("SQL Query: SELECT COUNT(*) FROM properties WHERE city = 'Wellington City' (limit 0)");
       const { count: testCount, error: testError } = await supabase
-        .from('properties')
+        .from('properties_view')
         .select('*', { count: 'exact' })
         .eq('region', 'Wellington')
         .limit(0);
@@ -45,7 +44,7 @@ export async function GET() {
 
     // Get total properties for Auckland using region
     const aucklandResult = await supabase
-      .from('properties')
+      .from('properties_view')
       .select('*', { count: 'exact' })
       .eq('region', 'Auckland')
       .limit(0);
@@ -63,7 +62,7 @@ export async function GET() {
 
     // Get total properties for Wellington using region
     const wellingtonResult = await supabase
-      .from('properties')
+      .from('properties_view')
       .select('*', { count: 'exact' })
       .eq('region', 'Wellington')
       .limit(0);
@@ -91,7 +90,6 @@ export async function GET() {
       aucklandForecast: aucklandForecastCount,
       wellingtonForecast: wellingtonForecastCount
     });
-
   } catch (error: any) {
     console.error('Error in database analysis:', error);
     return NextResponse.json(

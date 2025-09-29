@@ -7,6 +7,11 @@ export async function fetchPropertiesByCity(
   suburbs: string[] | null = null
 ): Promise<Property[]> {
   try {
+    // Don't fetch if city is not provided
+    if (!city) {
+      return [];
+    }
+
     const params = new URLSearchParams();
     params.append("city", city);
     params.append("page", page.toString());
@@ -18,7 +23,14 @@ export async function fetchPropertiesByCity(
 
     console.log("Fetching properties for city:", city);
 
-    const response = await fetch(`/api/property?${params.toString()}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    const response = await fetch(`/api/property?${params.toString()}`, {
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -28,7 +40,10 @@ export async function fetchPropertiesByCity(
     const data = await response.json();
     console.log("Fetched properties count:", data?.length || 0);
     return data as Property[];
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout - the server took too long to respond');
+    }
     console.error("Error in fetchPropertiesByCity:", error);
     throw error;
   }
