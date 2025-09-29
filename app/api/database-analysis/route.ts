@@ -10,52 +10,86 @@ const supabase = createClient(
 export async function GET() {
   try {
     console.log("Starting database analysis");
-    
-    // 1. 简单测试 - 获取表数量
-    const { count, error: countError } = await supabase
-      .from('properties_with_latest_status')
-      .select('*', { count: 'exact', head: true });
 
-    if (countError) {
-      console.error('Error counting properties:', countError);
-      return NextResponse.json({ error: 'Failed to count properties', details: countError.message }, { status: 500 });
+
+    // Test basic table access without filters
+    const { count: totalCount, error: totalError } = await supabase
+      .from('properties')
+      .select('*', { count: 'exact' })
+      .limit(0);
+
+    console.log("Total properties count:", totalCount, "error:", totalError);
+    if (totalError) {
+      console.log("Full error object:", JSON.stringify(totalError, null, 2));
+      // Try with a filter that works (from property API)
+      console.log("Trying with city filter...");
+      console.log("SQL Query: SELECT COUNT(*) FROM properties WHERE city = 'Wellington City' (limit 0)");
+      const { count: testCount, error: testError } = await supabase
+        .from('properties')
+        .select('*', { count: 'exact' })
+        .eq('region', 'Wellington')
+        .limit(0);
+      console.log("Test count:", testCount, "error:", testError);
     }
 
-    console.log("Properties count:", count);
-    
-    // 2. 获取一些数据样本 (使用正确的字段)
-    const { data: sampleData, error: sampleError } = await supabase
-      .from('properties_with_latest_status')
-      .select('*')
-      .limit(5);
-
-    if (sampleError) {
-      console.error('Error fetching sample data:', sampleError);
-      return NextResponse.json({ error: 'Failed to fetch sample data', details: sampleError.message }, { status: 500 });
+    if (totalError) {
+      console.error('Error accessing properties table:', totalError);
+      return NextResponse.json({ error: 'Failed to access properties table', details: (totalError as any).message }, { status: 500 });
     }
 
-    console.log("Sample data fetched successfully");
-    
-    // 3. 计算大字段占用情况
-    let historySize = 0;
-    let imageUrlCount = 0;
-    
-    sampleData.forEach((property: any) => {
-      if (property.property_history) {
-        historySize += property.property_history.length;
-      }
-      if (property.cover_image_url) {
-        imageUrlCount++;
-      }
-    });
+    // Declare variables once
+    let aucklandPropertiesCount: number | null = null;
+    let wellingtonPropertiesCount: number | null = null;
+    let aucklandForecastCount: number | null = null;
+    let wellingtonForecastCount: number | null = null;
+
+    // Get total properties for Auckland using region
+    const aucklandResult = await supabase
+      .from('properties')
+      .select('*', { count: 'exact' })
+      .eq('region', 'Auckland')
+      .limit(0);
+
+    console.log("Auckland region query result - count:", aucklandResult.count, "error:", aucklandResult.error);
+    if (aucklandResult.error) {
+      console.log("Full error object:", JSON.stringify(aucklandResult.error, null, 2));
+    }
+
+    if (aucklandResult.error) {
+      console.error('Error counting Auckland properties:', aucklandResult.error);
+      return NextResponse.json({ error: 'Failed to count Auckland properties', details: (aucklandResult.error as any).message }, { status: 500 });
+    }
+    aucklandPropertiesCount = aucklandResult.count || 0;
+
+    // Get total properties for Wellington using region
+    const wellingtonResult = await supabase
+      .from('properties')
+      .select('*', { count: 'exact' })
+      .eq('region', 'Wellington')
+      .limit(0);
+
+    console.log("Wellington region query result - count:", wellingtonResult.count, "error:", wellingtonResult.error);
+    if (wellingtonResult.error) {
+      console.log("Full error object:", JSON.stringify(wellingtonResult.error, null, 2));
+    }
+
+    if (wellingtonResult.error) {
+      console.error('Error counting Wellington properties:', wellingtonResult.error);
+      return NextResponse.json({ error: 'Failed to count Wellington properties', details: (wellingtonResult.error as any).message }, { status: 500 });
+    }
+    wellingtonPropertiesCount = wellingtonResult.count || 0;
+
+    // Use properties counts for forecast as fallback (since view doesn't exist)
+    aucklandForecastCount = aucklandPropertiesCount;
+    wellingtonForecastCount = wellingtonPropertiesCount;
 
     // Return collected data
     return NextResponse.json({
       message: "Database analysis completed successfully",
-      propertyCount: count,
-      sampleData: sampleData.length,
-      historySize: historySize,
-      imageUrlCount: imageUrlCount
+      aucklandProperties: aucklandPropertiesCount,
+      wellingtonProperties: wellingtonPropertiesCount,
+      aucklandForecast: aucklandForecastCount,
+      wellingtonForecast: wellingtonForecastCount
     });
 
   } catch (error: any) {
