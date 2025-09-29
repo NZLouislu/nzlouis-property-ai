@@ -580,7 +580,7 @@ const Properties: React.FC = () => {
                             fontSize: "1.4rem",
                           }}
                         >
-                          {formatCurrency(property.price)}
+                          {formatCurrency(property.last_sold_price)}
                         </span>
                       </div>
                       <div

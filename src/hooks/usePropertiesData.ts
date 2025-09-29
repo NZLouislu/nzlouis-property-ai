@@ -9,6 +9,11 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       try {
+        // Only fetch if city is selected
+        if (!city) {
+          return [];
+        }
+        
         // 过滤掉空字符串的郊区
         const filteredSuburbs = suburbs?.filter((suburb) => suburb !== "");
         return await fetchPropertiesByCity(
@@ -17,7 +22,7 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
           pageSize,
           filteredSuburbs || null
         );
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching properties:", error);
         // 返回空数组而不是抛出错误
         return [];
@@ -28,5 +33,7 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
     // 添加错误处理配置
     retry: 1,
     staleTime: 5 * 60 * 1000, // 5分钟
+    enabled: !!city, // Only enable query when city is selected
+    refetchOnWindowFocus: false, // Disable refetch on window focus to reduce requests
   });
 }

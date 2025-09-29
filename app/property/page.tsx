@@ -8,8 +8,8 @@ import { FaSearch } from "react-icons/fa";
 
 export default function PropertyPage() {
   const lastPropertyElementRef = useRef<HTMLDivElement>(null);
-  const [selectedRegion, setSelectedRegion] = useState("Wellington");
-  const [selectedCity, setSelectedCity] = useState("Wellington City");
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
   const [selectedSuburb, setSelectedSuburb] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -47,37 +47,37 @@ export default function PropertyPage() {
     ? propertiesData.pages.flatMap((page) => page)
     : [];
 
-  const wellingtonSuburbs: string[] = [
-    "Khandallah",
-    "Ngaio",
-    "Tawa",
-    "Newlands",
-    "Woodridge",
-    "Johnsonville",
-    "Churton Park",
-    "Kaiwharawhara",
-    "Karori",
-  ];
-
-  const aucklandSuburbs: string[] = [
-    "Auckland City Centre",
-    "Epsom",
-    "Mount Eden",
-    "Remuera",
-    "Parnell",
-    "Newmarket",
-    "Greenlane",
-    "Panmure",
-    "Glen Innes",
-  ];
-
-  const getSuburbsForCity = () => {
-    if (selectedCity === "Wellington City") {
-      return wellingtonSuburbs;
-    } else if (selectedCity === "Auckland") {
-      return aucklandSuburbs;
+  const regions = [
+    { 
+      name: "Auckland", 
+      cities: [
+        "Auckland - City",
+        "Auckland - Franklin",
+        "Auckland - Manukau",
+        "Auckland - North Shore",
+        "Auckland - Papakura",
+        "Auckland - Rodney",
+        "Auckland - Waitakere"
+      ]
+    },
+    { 
+      name: "Wellington", 
+      cities: [
+        "Carterton District",
+        "Kapiti Coast District",
+        "Lower Hutt City",
+        "Masterton District",
+        "Porirua City",
+        "South Wairarapa District",
+        "Upper Hutt City",
+        "Wellington City"
+      ]
     }
-    return [];
+  ];
+
+  const getCitiesForRegion = () => {
+    const region = regions.find(r => r.name === selectedRegion);
+    return region ? region.cities : [];
   };
 
   // Filter properties based on search query
@@ -155,7 +155,7 @@ export default function PropertyPage() {
           value={selectedRegion}
           onChange={(e) => {
             setSelectedRegion(e.target.value);
-            setSelectedCity("Wellington City");
+            setSelectedCity("");
             setSelectedSuburb("");
           }}
           style={{
@@ -171,14 +171,20 @@ export default function PropertyPage() {
           }}
         >
           <option value="">Select Region</option>
-          <option value="Wellington">Wellington</option>
-          <option value="Auckland">Auckland</option>
+          {regions.map((region) => (
+            <option key={region.name} value={region.name}>
+              {region.name}
+            </option>
+          ))}
         </select>
 
-        {selectedCity && (
+        {selectedRegion && (
           <select
-            value={selectedSuburb}
-            onChange={(e) => setSelectedSuburb(e.target.value)}
+            value={selectedCity}
+            onChange={(e) => {
+              setSelectedCity(e.target.value);
+              setSelectedSuburb("");
+            }}
             style={{
               padding: "14px 18px",
               borderRadius: "10px",
@@ -191,15 +197,32 @@ export default function PropertyPage() {
               cursor: "pointer",
             }}
           >
-            <option value="">All Suburbs</option>
-            {getSuburbsForCity().map((suburb) => (
-              <option key={suburb} value={suburb}>
-                {suburb}
+            <option value="">Select City</option>
+            {getCitiesForRegion().map((city) => (
+              <option key={city} value={city}>
+                {city}
               </option>
             ))}
           </select>
         )}
       </div>
+
+      {/* Error message display */}
+      {isError && (
+        <div style={{
+          padding: "16px",
+          marginBottom: "24px",
+          backgroundColor: "#fee",
+          border: "1px solid #fcc",
+          borderRadius: "8px",
+          color: "#c33",
+          textAlign: "center"
+        }}>
+          Error loading properties: {error?.message || "Unknown error occurred"}
+          <br />
+          <small>This may be due to a temporary server issue or database timeout. Please try again later.</small>
+        </div>
+      )}
 
       <PropertyList
         properties={filteredProperties}

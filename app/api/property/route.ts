@@ -9,25 +9,58 @@ const supabase = createClient(
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const region = searchParams.get("region") || "";
   const city = searchParams.get("city") || "";
   const page = parseInt(searchParams.get("page") || "0");
-  const pageSize = parseInt(searchParams.get("pageSize") || "9");
+  const pageSize = Math.min(parseInt(searchParams.get("pageSize") || "9"), 50); // 限制最大页面大小为50
   const suburbs = searchParams.get("suburbs")?.split(",") || [];
+
+  // Return empty array if no city is specified
+  if (!city) {
+    return NextResponse.json([]);
+  }
 
   try {
     console.log("Fetching properties for city:", city);
 
-    let query = supabase
-      .from("properties")
-      .select("*")
-      .eq("city", city)
-      .range(page * pageSize, (page + 1) * pageSize - 1);
+    // 限制最大记录数以防止超时
+    const maxRecords = 500; // 减少最大记录数
+    const start = page * pageSize;
+    const end = Math.min(start + pageSize - 1, start + maxRecords - 1);
 
-    // Apply filter for region if specified
-    if (region && region.trim() !== "") {
-      query = query.eq("region", region);
-    }
+    // 使用优化的视图查询
+    let query = supabase
+      .from("properties_view")
+      .select(`
+        id,
+        property_url,
+        last_sold_price,
+        address,
+        suburb,
+        city,
+        postcode,
+        year_built,
+        bedrooms,
+        bathrooms,
+        car_spaces,
+        floor_size,
+        land_area,
+        last_sold_price,
+        last_sold_date,
+        capital_value,
+        land_value,
+        improvement_value,
+        has_rental_history,
+        is_currently_rented,
+        status,
+        property_history,
+        normalized_address,
+        created_at,
+        region,
+        cover_image_url
+      `)
+      .eq("city", city)
+      .order("id") // 添加排序确保结果一致性
+      .range(start, end);
 
     // Apply filter only when suburbs is not empty and does not contain empty string
     // Filter out any empty strings in the suburbs array
