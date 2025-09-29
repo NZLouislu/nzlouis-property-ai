@@ -89,18 +89,30 @@ export default function ForecastPage() {
 
       <div
         style={{
-          display: "flex",
-          gap: "16px",
           marginBottom: "32px",
-          flexWrap: "wrap",
-          justifyContent: "center",
           padding: "20px",
           backgroundColor: "#f8f9fa",
           borderRadius: "12px",
           boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
         }}
       >
-        <div style={{ position: "relative", minWidth: "220px" }}>
+        <div style={{ 
+          display: "flex",
+          gap: "16px",
+          marginBottom: "16px",
+          flexWrap: "wrap",
+        }}>
+          <div style={{ flex: "1", minWidth: "200px" }}>
+            <LocationSelector 
+              onSelectionChange={handleLocationChange}
+              defaultRegion="Wellington"
+              defaultCity="Wellington City"
+              defaultSuburb="all-suburbs"
+            />
+          </div>
+        </div>
+        
+        <div style={{ position: "relative", width: "100%" }}>
           <FaSearch
             style={{
               position: "absolute",
@@ -124,16 +136,10 @@ export default function ForecastPage() {
               backgroundColor: "#fff",
               boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
               transition: "all 0.2s",
+              boxSizing: "border-box",
             }}
           />
         </div>
-
-        <LocationSelector 
-          onSelectionChange={handleLocationChange}
-          defaultRegion="Wellington"
-          defaultCity="Wellington City"
-          defaultSuburb="all-suburbs"
-        />
       </div>
 
       <PropertyList
