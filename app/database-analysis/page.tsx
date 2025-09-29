@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import NavBar from "@/src/components/NavBar";
 import { useDatabaseAnalysisStore } from "@/src/stores/useDatabaseAnalysisStore";
 
 export default function DatabaseAnalysisPage() {
@@ -27,7 +26,6 @@ export default function DatabaseAnalysisPage() {
   if (loading) {
     return (
       <div>
-        <NavBar />
         <div style={{ padding: "20px", textAlign: "center" }}>
           <h1>Database Analysis</h1>
           <p>Loading database analysis data...</p>
@@ -39,7 +37,6 @@ export default function DatabaseAnalysisPage() {
   if (error) {
     return (
       <div>
-        <NavBar />
         <div style={{ padding: "20px", textAlign: "center" }}>
           <h1>Database Analysis</h1>
           <p style={{ color: "red" }}>Error: {error}</p>
@@ -51,7 +48,6 @@ export default function DatabaseAnalysisPage() {
   if (!data) {
     return (
       <div>
-        <NavBar />
         <div style={{ padding: "20px", textAlign: "center" }}>
           <h1>Database Analysis</h1>
           <p>No data available</p>
@@ -62,7 +58,6 @@ export default function DatabaseAnalysisPage() {
 
   return (
     <div>
-      <NavBar />
       <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
           <div>
@@ -87,7 +82,6 @@ export default function DatabaseAnalysisPage() {
           </button>
         </div>
         
-        {/* 属性统计信息 */}
         <section style={{ marginBottom: "30px" }}>
           <h2>Property Statistics</h2>
           <div style={{
