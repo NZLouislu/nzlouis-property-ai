@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, RefObject } from "react";
-import { usePropertiesData } from "@/src/hooks/usePropertiesData";
+import { useForecastData } from "@/src/hooks/useForecastData";
 import { Property } from "@/src/components/properties.type";
 import PropertyList from "@/src/components/Properties/PropertyList";
 import { FaSearch } from "react-icons/fa";
 
-export default function PropertyPage() {
+export default function ForecastPage() {
   const lastPropertyElementRef = useRef<HTMLDivElement>(null);
   const [selectedRegion, setSelectedRegion] = useState("Wellington");
   const [selectedCity, setSelectedCity] = useState("Wellington City");
@@ -22,7 +22,7 @@ export default function PropertyPage() {
     error,
     fetchNextPage,
     hasNextPage,
-  } = usePropertiesData(selectedCity, [selectedSuburb]);
+  } = useForecastData(selectedCity, [selectedSuburb]);
 
   const propertiesData = data as { pages: Property[][] } | undefined;
 
@@ -80,7 +80,6 @@ export default function PropertyPage() {
     return [];
   };
 
-  // Filter properties based on search query
   const filteredProperties: Property[] = properties.filter((property) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -107,7 +106,7 @@ export default function PropertyPage() {
           textShadow: "0 2px 4px rgba(0,0,0,0.1)",
         }}
       >
-        All Properties
+        Forecast Properties
       </h1>
 
       <div
@@ -155,7 +154,11 @@ export default function PropertyPage() {
           value={selectedRegion}
           onChange={(e) => {
             setSelectedRegion(e.target.value);
-            setSelectedCity("Wellington City");
+            if (e.target.value === "Wellington") {
+              setSelectedCity("Wellington City");
+            } else if (e.target.value === "Auckland") {
+              setSelectedCity("Auckland");
+            }
             setSelectedSuburb("");
           }}
           style={{

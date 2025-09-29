@@ -9,6 +9,7 @@ const supabase = createClient(
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
+  const region = searchParams.get("region") || "";
   const city = searchParams.get("city") || "";
   const page = parseInt(searchParams.get("page") || "0");
   const pageSize = parseInt(searchParams.get("pageSize") || "9");
@@ -18,10 +19,15 @@ export async function GET(request: Request) {
     console.log("Fetching properties for city:", city);
 
     let query = supabase
-      .from("properties_with_latest_status")
+      .from("properties")
       .select("*")
       .eq("city", city)
       .range(page * pageSize, (page + 1) * pageSize - 1);
+
+    // Apply filter for region if specified
+    if (region && region.trim() !== "") {
+      query = query.eq("region", region);
+    }
 
     // Apply filter only when suburbs is not empty and does not contain empty string
     // Filter out any empty strings in the suburbs array

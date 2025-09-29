@@ -1,6 +1,6 @@
 import { Property } from "../components/properties.type";
 
-export async function fetchPropertiesByCity(
+export async function fetchForecastPropertiesByCity(
   city: string,
   page: number = 0,
   pageSize: number = 9,
@@ -16,20 +16,22 @@ export async function fetchPropertiesByCity(
       params.append("suburbs", suburbs.join(","));
     }
 
-    console.log("Fetching properties for city:", city);
+    console.log("Fetching forecast properties for city:", city);
 
-    const response = await fetch(`/api/property?${params.toString()}`);
+    const response = await fetch(`/api/forecast?${params.toString()}`);
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Failed to fetch properties: ${errorData.error}`);
+      throw new Error(
+        `Failed to fetch forecast properties: ${errorData.error}`
+      );
     }
 
     const data = await response.json();
-    console.log("Fetched properties count:", data?.length || 0);
+    console.log("Fetched forecast properties count:", data?.length || 0);
     return data as Property[];
   } catch (error) {
-    console.error("Error in fetchPropertiesByCity:", error);
+    console.error("Error in fetchForecastPropertiesByCity:", error);
     throw error;
   }
 }
