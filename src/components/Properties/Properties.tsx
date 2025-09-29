@@ -135,7 +135,7 @@ const Properties: React.FC = () => {
           textShadow: "0 2px 4px rgba(0,0,0,0.1)",
         }}
       >
-        Predicted Properties
+        Property Forecast
       </h1>
 
       <div

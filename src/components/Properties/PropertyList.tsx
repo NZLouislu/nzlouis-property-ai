@@ -1,62 +1,477 @@
 import React, { RefObject } from "react";
 import { Property } from "../properties.type";
-import formatNumberWithCommas from "../../utils/formatNumber";
+import {
+  FaBed,
+  FaBath,
+  FaCar,
+  FaRulerCombined,
+  FaMapMarkerAlt,
+  FaDollarSign,
+  FaHeart,
+  FaShareAlt,
+} from "react-icons/fa";
 
-const PropertyCard: React.FC<{ property: Property }> = ({ property }) => {
+const PropertyCard: React.FC<{
+  property: Property;
+  onFavoriteToggle?: (id: string) => void;
+  isFavorite?: boolean;
+}> = ({ property, onFavoriteToggle, isFavorite }) => {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-NZ", {
+      style: "currency",
+      currency: "NZD",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <div
       style={{
-        padding: "20px",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        border: "1px solid #ddd",
-        borderRadius: "8px",
-        marginBottom: "16px",
+        border: "1px solid #e2e8f0",
+        borderRadius: "16px",
+        overflow: "hidden",
+        boxShadow: "0 8px 16px rgba(0,0,0,0.08)",
+        backgroundColor: "#fff",
+        transition: "all 0.3s ease",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.transform = "translateY(-8px)";
+        (e.currentTarget as HTMLElement).style.boxShadow =
+          "0 12px 24px rgba(0,0,0,0.15)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+        (e.currentTarget as HTMLElement).style.boxShadow =
+          "0 8px 16px rgba(0,0,0,0.08)";
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div style={{ position: "relative" }}>
         <a
           href={property.property_url}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ fontWeight: "bold", fontSize: "16px", color: "#007bff" }}
-        >
-          {property.address}
-        </a>
-        <div style={{ fontSize: "14px" }}>
-          {property.suburb}, {property.city}
-        </div>
-        <div
           style={{
-            display: "inline-block",
-            padding: "4px 8px",
-            borderRadius: "4px",
-            backgroundColor:
-              property.predicted_status === "likely" ? "#d4edda" : "#f8f9fa",
-            color: property.predicted_status === "likely" ? "#155724" : "#333",
-            fontSize: "12px",
-            width: "fit-content",
+            display: "block",
+            height: "220px",
+            textDecoration: "none",
+            color: "inherit",
           }}
         >
-          {property.predicted_status} ({property.confidence_score})
+          {property.cover_image_url ? (
+            <img
+              src={property.cover_image_url}
+              alt={property.address}
+              style={{
+                width: "100%",
+                height: "220px",
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                height: "220px",
+                background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#4a5568",
+                fontSize: "16px",
+                fontWeight: "600",
+                position: "relative",
+              }}
+            >
+              <div
+                style={{
+                  backgroundColor: "#e2e8f0",
+                  width: "80%",
+                  height: "70%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "8px",
+                  border: "2px dashed #94a3b8",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#64748b",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                  }}
+                >
+                  No Image Available
+                </span>
+              </div>
+              <div
+                style={{
+                  marginTop: "12px",
+                  color: "#475569",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+              >
+                Default Property Image
+              </div>
+            </div>
+          )}
+        </a>
+        <div
+          style={{
+            position: "absolute",
+            top: "16px",
+            right: "16px",
+            display: "flex",
+            gap: "10px",
+          }}
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavoriteToggle?.(property.id);
+            }}
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              border: "none",
+              borderRadius: "50%",
+              width: "40px",
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.transform = "scale(1.1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.transform = "scale(1)";
+            }}
+          >
+            <FaHeart
+              style={{
+                color: isFavorite ? "#e53e3e" : "#a0aec0",
+                fontSize: "18px",
+              }}
+            />
+          </button>
+          <button
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              border: "none",
+              borderRadius: "50%",
+              width: "40px",
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.transform = "scale(1.1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.transform = "scale(1)";
+            }}
+          >
+            <FaShareAlt style={{ color: "#4a5568", fontSize: "16px" }} />
+          </button>
         </div>
-        <div style={{ fontSize: "14px" }}>
-          Last sold: {property.last_sold_date} ($
-          {formatNumberWithCommas(property.last_sold_price)})
+        {property.category && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "16px",
+              left: "16px",
+              backgroundColor: "rgba(34, 197, 94, 0.9)",
+              color: "white",
+              padding: "6px 12px",
+              borderRadius: "20px",
+              fontSize: "0.85rem",
+              fontWeight: "600",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+            }}
+          >
+            {property.category}
+          </div>
+        )}
+      </div>
+
+      <div
+        style={{
+          padding: "24px",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "16px",
+          }}
+        >
+          <h3
+            style={{
+              margin: 0,
+              fontSize: "1.3rem",
+              fontWeight: "700",
+              color: "#2d3748",
+              flex: 1,
+              lineHeight: "1.3",
+            }}
+          >
+            {property.address}
+          </h3>
         </div>
-        <div style={{ fontSize: "14px" }}>Built: {property.year_built}</div>
-        <div style={{ fontSize: "14px" }}>
-          Floor: {property.floor_size}, Land Area: {property.land_area}
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "18px",
+            color: "#718096",
+            fontSize: "0.95rem",
+          }}
+        >
+          <FaMapMarkerAlt style={{ marginRight: "8px", fontSize: "1rem" }} />
+          <span>
+            {property.suburb}, {property.city}
+          </span>
         </div>
-        <div style={{ fontSize: "14px" }}>
-          Capital Value: ${formatNumberWithCommas(property.capital_value)}
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "20px",
+            alignItems: "flex-end",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "8px",
+              }}
+            >
+              <FaDollarSign
+                style={{
+                  marginRight: "6px",
+                  color: "#22c55e",
+                  fontSize: "1rem",
+                }}
+              />
+              <span
+                style={{
+                  fontWeight: "700",
+                  color: "#2d3748",
+                  fontSize: "1.4rem",
+                }}
+              >
+                {formatCurrency(property.price)}
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <FaDollarSign
+                style={{
+                  marginRight: "6px",
+                  color: "#718096",
+                  fontSize: "0.9rem",
+                }}
+              />
+              <span
+                style={{
+                  fontWeight: "500",
+                  color: "#718096",
+                  fontSize: "0.9rem",
+                }}
+              >
+                Last sold: {formatCurrency(property.last_sold_price)} (
+                {property.last_sold_date})
+              </span>
+            </div>
+          </div>
         </div>
-        <div style={{ fontSize: "14px" }}>
-          Has Rental History: {property.has_rental_history ? "Yes" : "No"}, Is
-          Rented: {property.is_currently_rented ? "Yes" : "No"}
-        </div>
-        <div style={{ fontSize: "14px" }}>
-          Bedrooms: {property.bedrooms}, Bathrooms: {property.bathrooms}, Car
-          Spaces: {property.car_spaces}
+
+        <div
+          style={{
+            borderTop: "1px solid #edf2f7",
+            paddingTop: "20px",
+            marginTop: "auto",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-around",
+              textAlign: "center",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "6px",
+                }}
+              >
+                <FaBed
+                  style={{
+                    marginRight: "6px",
+                    color: "#718096",
+                    fontSize: "1.1rem",
+                  }}
+                />
+                <span
+                  style={{
+                    fontWeight: "600",
+                    color: "#2d3748",
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  {property.bedrooms}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#718096",
+                  fontWeight: "500",
+                }}
+              >
+                Beds
+              </div>
+            </div>
+
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "6px",
+                }}
+              >
+                <FaBath
+                  style={{
+                    marginRight: "6px",
+                    color: "#718096",
+                    fontSize: "1.1rem",
+                  }}
+                />
+                <span
+                  style={{
+                    fontWeight: "600",
+                    color: "#2d3748",
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  {property.bathrooms}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#718096",
+                  fontWeight: "500",
+                }}
+              >
+                Baths
+              </div>
+            </div>
+
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "6px",
+                }}
+              >
+                <FaCar
+                  style={{
+                    marginRight: "6px",
+                    color: "#718096",
+                    fontSize: "1.1rem",
+                  }}
+                />
+                <span
+                  style={{
+                    fontWeight: "600",
+                    color: "#2d3748",
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  {property.car_spaces}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#718096",
+                  fontWeight: "500",
+                }}
+              >
+                Cars
+              </div>
+            </div>
+
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "6px",
+                }}
+              >
+                <FaRulerCombined
+                  style={{
+                    marginRight: "6px",
+                    color: "#718096",
+                    fontSize: "1.1rem",
+                  }}
+                />
+                <span
+                  style={{
+                    fontWeight: "600",
+                    color: "#2d3748",
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  {property.land_area}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: "0.8rem",
+                  color: "#718096",
+                  fontWeight: "500",
+                }}
+              >
+                m²
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -65,27 +480,207 @@ const PropertyCard: React.FC<{ property: Property }> = ({ property }) => {
 
 const PropertyList: React.FC<{
   properties: Property[];
-  lastPropertyElementRef: RefObject<HTMLDivElement>;
-}> = ({ properties, lastPropertyElementRef }) => {
+  lastPropertyElementRef?: RefObject<HTMLDivElement>;
+  isLoading?: boolean;
+  isFetchingNextPage?: boolean;
+  isError?: boolean;
+  error?: Error;
+  fetchNextPage?: () => void;
+  hasNextPage?: boolean;
+  favorites?: Set<string>;
+  onFavoriteToggle?: (id: string) => void;
+}> = ({
+  properties,
+  lastPropertyElementRef,
+  isLoading,
+  isFetchingNextPage,
+  isError,
+  error,
+  fetchNextPage,
+  hasNextPage,
+  favorites = new Set(),
+  onFavoriteToggle,
+}) => {
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gap: "30px",
+        }}
+      >
+        {[...Array(6)].map((_, index) => (
+          <div
+            key={index}
+            style={{
+              border: "1px solid #e0e0e0",
+              borderRadius: "16px",
+              overflow: "hidden",
+              boxShadow: "0 8px 16px rgba(0,0,0,0.08)",
+              backgroundColor: "#fff",
+              height: "400px",
+              transition: "all 0.3s ease",
+            }}
+          >
+            <div
+              style={{
+                height: "220px",
+                backgroundColor: "#f1f5f9",
+                animation: "pulse 1.5s ease-in-out infinite",
+              }}
+            ></div>
+            <div style={{ padding: "20px" }}>
+              <div
+                style={{
+                  height: "24px",
+                  backgroundColor: "#f1f5f9",
+                  marginBottom: "12px",
+                  animation: "pulse 1.5s ease-in-out infinite",
+                }}
+              ></div>
+              <div
+                style={{
+                  height: "18px",
+                  backgroundColor: "#f1f5f9",
+                  marginBottom: "10px",
+                  animation: "pulse 1.5s ease-in-out infinite",
+                }}
+              ></div>
+              <div
+                style={{
+                  height: "18px",
+                  backgroundColor: "#f1f5f9",
+                  animation: "pulse 1.5s ease-in-out infinite",
+                }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          padding: "60px 30px",
+          color: "#e53e3e",
+          backgroundColor: "#fff5f5",
+          borderRadius: "12px",
+          border: "1px solid #fed7d7",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+        }}
+      >
+        <h3 style={{ fontSize: "1.5rem", marginBottom: "12px" }}>
+          Error loading properties
+        </h3>
+        <p style={{ fontSize: "1rem" }}>
+          {error?.message || "Failed to load properties"}
+        </p>
+      </div>
+    );
+  }
+
+  if (properties.length === 0) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          padding: "80px 30px",
+          color: "#718096",
+          backgroundColor: "#f8fafc",
+          borderRadius: "16px",
+          border: "1px solid #e2e8f0",
+        }}
+      >
+        <h3
+          style={{
+            fontSize: "1.8rem",
+            marginBottom: "16px",
+            color: "#4a5568",
+          }}
+        >
+          No properties found
+        </h3>
+        <p style={{ fontSize: "1.1rem" }}>Try adjusting your search criteria</p>
+      </div>
+    );
+  }
+
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-        gap: "20px",
-      }}
-    >
-      {properties.map((p, index) => {
-        if (index === properties.length - 1) {
+    <>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gap: "30px",
+        }}
+      >
+        {properties.map((p, index) => {
+          const ref =
+            index === properties.length - 1 && lastPropertyElementRef
+              ? lastPropertyElementRef
+              : undefined;
           return (
-            <div key={p.id} ref={lastPropertyElementRef}>
-              <PropertyCard property={p} />
+            <div key={p.id} ref={ref}>
+              <PropertyCard
+                property={p}
+                onFavoriteToggle={onFavoriteToggle}
+                isFavorite={favorites.has(p.id)}
+              />
             </div>
           );
+        })}
+      </div>
+
+      {isFetchingNextPage && (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "30px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              width: "48px",
+              height: "48px",
+              border: "4px solid #f3f4f6",
+              borderTop: "4px solid #3b82f6",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          ></div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
-        return <PropertyCard key={p.id} property={p} />;
-      })}
-    </div>
+
+        @keyframes pulse {
+          0% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.6;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+      `}</style>
+    </>
   );
 };
 

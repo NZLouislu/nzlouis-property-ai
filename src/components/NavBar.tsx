@@ -9,6 +9,7 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
 
   const items = [
+    { label: "Forecast", href: "/forecast" },
     { label: "Properties", href: "/property" },
     { label: "DB Analysis", href: "/database-analysis" },
   ];
@@ -20,7 +21,7 @@ export default function NavBar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/30 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
-        <div 
+        <div
           onClick={handleLogoClick}
           className="flex items-center cursor-pointer"
         >
