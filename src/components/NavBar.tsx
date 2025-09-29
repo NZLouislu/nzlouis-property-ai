@@ -9,8 +9,8 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
 
   const items = [
-    { label: "Forecast", href: "/forecast" },
     { label: "Properties", href: "/property" },
+    { label: "Forecast", href: "/forecast" },
     { label: "DB Analysis", href: "/database-analysis" },
   ];
 
