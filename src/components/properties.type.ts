@@ -13,6 +13,7 @@ export interface Property {
   address: string;
   suburb: string;
   city: string;
+  region: string;
   predicted_status?: string;
   confidence_score?: number;
   last_sold_price: number;
@@ -29,5 +30,5 @@ export interface Property {
   improvement_value: number;
   has_rental_history: boolean;
   is_currently_rented: boolean;
-  cover_image_url?: string; // 添加 cover_image_url 字段
+  cover_image_url?: string;
 }
