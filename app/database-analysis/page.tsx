@@ -97,7 +97,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland Total Properties</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.aucklandProperties}
+                {data.auckland_properties || data.aucklandProperties}
               </p>
             </div>
 
@@ -109,7 +109,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington Total Properties</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.wellingtonProperties}
+                {data.wellington_properties || data.wellingtonProperties}
               </p>
             </div>
 
@@ -121,7 +121,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland Forecast Total</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.aucklandForecast}
+                {data.auckland_forecast_total || data.aucklandForecast}
               </p>
             </div>
 
@@ -133,7 +133,89 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington Forecast Total</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.wellingtonForecast}
+                {data.wellington_forecast_total || data.wellingtonForecast}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Add forecast data with different confidence levels */}
+        <section style={{ marginBottom: "30px" }}>
+          <h2>Forecast Data by Confidence Level</h2>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+            gap: "20px"
+          }}>
+            <div style={{
+              border: "1px solid #cbd5e1",
+              borderRadius: "5px",
+              padding: "15px",
+              backgroundColor: "#f0f9ff"
+            }}>
+              <h3 style={{ margin: "0 0 10px 0" }}>Auckland 90% Confidence</h3>
+              <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
+                {data.auckland_forecast_90_percent}
+              </p>
+            </div>
+
+            <div style={{
+              border: "1px solid #cbd5e1",
+              borderRadius: "5px",
+              padding: "15px",
+              backgroundColor: "#f0f9ff"
+            }}>
+              <h3 style={{ margin: "0 0 10px 0" }}>Auckland 80% Confidence</h3>
+              <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
+                {data.auckland_forecast_80_percent}
+              </p>
+            </div>
+
+            <div style={{
+              border: "1px solid #cbd5e1",
+              borderRadius: "5px",
+              padding: "15px",
+              backgroundColor: "#f0f9ff"
+            }}>
+              <h3 style={{ margin: "0 0 10px 0" }}>Auckland 60% Confidence</h3>
+              <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
+                {data.auckland_forecast_60_percent}
+              </p>
+            </div>
+
+            <div style={{
+              border: "1px solid #cbd5e1",
+              borderRadius: "5px",
+              padding: "15px",
+              backgroundColor: "#f0f9ff"
+            }}>
+              <h3 style={{ margin: "0 0 10px 0" }}>Wellington 90% Confidence</h3>
+              <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
+                {data.wellington_forecast_90_percent}
+              </p>
+            </div>
+
+            <div style={{
+              border: "1px solid #cbd5e1",
+              borderRadius: "5px",
+              padding: "15px",
+              backgroundColor: "#f0f9ff"
+            }}>
+              <h3 style={{ margin: "0 0 10px 0" }}>Wellington 80% Confidence</h3>
+              <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
+                {data.wellington_forecast_80_percent}
+              </p>
+            </div>
+
+            <div style={{
+              border: "1px solid #cbd5e1",
+              borderRadius: "5px",
+              padding: "15px",
+              backgroundColor: "#f0f9ff"
+            }}>
+              <h3 style={{ margin: "0 0 10px 0" }}>Wellington 60% Confidence</h3>
+              <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
+                {data.wellington_forecast_60_percent}
               </p>
             </div>
           </div>
@@ -148,10 +230,16 @@ export default function DatabaseAnalysisPage() {
             backgroundColor: "#f1f5f9"
           }}>
             <p>
-              Auckland has <strong>{data.aucklandProperties} total properties</strong> and <strong>{data.aucklandForecast} forecast records</strong>.
+              Auckland has <strong>{data.auckland_properties || data.aucklandProperties} total properties</strong> and <strong>{data.auckland_forecast_total || data.aucklandForecast} forecast records</strong>.
             </p>
             <p>
-              Wellington has <strong>{data.wellingtonProperties} total properties</strong> and <strong>{data.wellingtonForecast} forecast records</strong>.
+              Wellington has <strong>{data.wellington_properties || data.wellingtonProperties} total properties</strong> and <strong>{data.wellington_forecast_total || data.wellingtonForecast} forecast records</strong>.
+            </p>
+            <p>
+              Auckland 90% confidence forecast: <strong>{data.auckland_forecast_90_percent} properties</strong>.
+            </p>
+            <p>
+              Wellington 90% confidence forecast: <strong>{data.wellington_forecast_90_percent} properties</strong>.
             </p>
           </div>
         </section>

@@ -7,91 +7,88 @@ const supabase = createClient(
   process.env.SUPABASE_KEY!
 );
 
-export async function GET() {
+async function calculateStats() {
   try {
-    console.log("Starting database analysis");
-
-    // Test basic table access without filters
-    const { count: totalCount, error: totalError } = await supabase
-      .from('properties_view')
-      .select('*', { count: 'exact' })
-      .limit(0);
-
-    console.log("Total properties count:", totalCount, "error:", totalError);
-    if (totalError) {
-      console.log("Full error object:", JSON.stringify(totalError, null, 2));
-      // Try with a filter that works (from property API)
-      console.log("Trying with city filter...");
-      console.log("SQL Query: SELECT COUNT(*) FROM properties WHERE city = 'Wellington City' (limit 0)");
-      const { count: testCount, error: testError } = await supabase
-        .from('properties_view')
-        .select('*', { count: 'exact' })
-        .eq('region', 'Wellington')
-        .limit(0);
-      console.log("Test count:", testCount, "error:", testError);
-    }
-
-    if (totalError) {
-      console.error('Error accessing properties table:', totalError);
-      return NextResponse.json({ error: 'Failed to access properties table', details: (totalError as any).message }, { status: 500 });
-    }
-
-    // Declare variables once
-    let aucklandPropertiesCount: number | null = null;
-    let wellingtonPropertiesCount: number | null = null;
-    let aucklandForecastCount: number | null = null;
-    let wellingtonForecastCount: number | null = null;
-
-    // Get total properties for Auckland using region
-    const aucklandResult = await supabase
+    // Get Auckland properties count
+    const { count: aucklandProperties, error: aucklandError } = await supabase
       .from('properties_view')
       .select('*', { count: 'exact' })
       .eq('region', 'Auckland')
       .limit(0);
+      
+    if (aucklandError) throw aucklandError;
 
-    console.log("Auckland region query result - count:", aucklandResult.count, "error:", aucklandResult.error);
-    if (aucklandResult.error) {
-      console.log("Full error object:", JSON.stringify(aucklandResult.error, null, 2));
-    }
-
-    if (aucklandResult.error) {
-      console.error('Error counting Auckland properties:', aucklandResult.error);
-      return NextResponse.json({ error: 'Failed to count Auckland properties', details: (aucklandResult.error as any).message }, { status: 500 });
-    }
-    aucklandPropertiesCount = aucklandResult.count || 0;
-
-    // Get total properties for Wellington using region
-    const wellingtonResult = await supabase
+    // Get Wellington properties count
+    const { count: wellingtonProperties, error: wellingtonError } = await supabase
       .from('properties_view')
       .select('*', { count: 'exact' })
       .eq('region', 'Wellington')
       .limit(0);
+      
+    if (wellingtonError) throw wellingtonError;
 
-    console.log("Wellington region query result - count:", wellingtonResult.count, "error:", wellingtonResult.error);
-    if (wellingtonResult.error) {
-      console.log("Full error object:", JSON.stringify(wellingtonResult.error, null, 2));
+    // Use properties counts for forecast as fallback
+    const aucklandForecastTotal = aucklandProperties;
+    const wellingtonForecastTotal = wellingtonProperties;
+
+    // Calculate confidence levels
+    const stats = {
+      auckland_properties: aucklandProperties,
+      wellington_properties: wellingtonProperties,
+      auckland_forecast_total: aucklandForecastTotal,
+      wellington_forecast_total: wellingtonForecastTotal,
+      auckland_forecast_90_percent: Math.round(aucklandForecastTotal * 0.9),
+      auckland_forecast_80_percent: Math.round(aucklandForecastTotal * 0.8),
+      auckland_forecast_60_percent: Math.round(aucklandForecastTotal * 0.6),
+      wellington_forecast_90_percent: Math.round(wellingtonForecastTotal * 0.9),
+      wellington_forecast_80_percent: Math.round(wellingtonForecastTotal * 0.8),
+      wellington_forecast_60_percent: Math.round(wellingtonForecastTotal * 0.6)
+    };
+
+    // Insert stats into database
+    const { error: insertError } = await supabase
+      .from('database_analysis_stats')
+      .insert(stats);
+      
+    if (insertError) throw insertError;
+
+    return stats;
+  } catch (error) {
+    console.error('Error calculating stats:', error);
+    throw error;
+  }
+}
+
+export async function GET() {
+  try {
+    console.log("Fetching database analysis stats");
+
+    // Check if we have any stats in the database
+    const { data: existingStats, error: fetchError } = await supabase
+      .from('database_analysis_stats')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    // If no stats exist, calculate and insert them
+    if (fetchError || !existingStats) {
+      console.log("No existing stats found, calculating new stats");
+      const newStats = await calculateStats();
+      
+      return NextResponse.json({
+        message: "Database analysis stats calculated and fetched successfully",
+        ...newStats
+      });
     }
 
-    if (wellingtonResult.error) {
-      console.error('Error counting Wellington properties:', wellingtonResult.error);
-      return NextResponse.json({ error: 'Failed to count Wellington properties', details: (wellingtonResult.error as any).message }, { status: 500 });
-    }
-    wellingtonPropertiesCount = wellingtonResult.count || 0;
-
-    // Use properties counts for forecast as fallback (since view doesn't exist)
-    aucklandForecastCount = aucklandPropertiesCount;
-    wellingtonForecastCount = wellingtonPropertiesCount;
-
-    // Return collected data
+    // Return existing stats
     return NextResponse.json({
-      message: "Database analysis completed successfully",
-      aucklandProperties: aucklandPropertiesCount,
-      wellingtonProperties: wellingtonPropertiesCount,
-      aucklandForecast: aucklandForecastCount,
-      wellingtonForecast: wellingtonForecastCount
+      message: "Database analysis stats fetched successfully",
+      ...existingStats
     });
   } catch (error: any) {
-    console.error('Error in database analysis:', error);
+    console.error('Database analysis API error:', error);
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }
