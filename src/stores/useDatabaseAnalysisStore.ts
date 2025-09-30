@@ -2,11 +2,25 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface DatabaseAnalysisData {
-  aucklandProperties: number;
-  wellingtonProperties: number;
-  aucklandForecast: number;
-  wellingtonForecast: number;
-  message: string;
+  // Original fields (for backward compatibility)
+  aucklandProperties?: number;
+  wellingtonProperties?: number;
+  aucklandForecast?: number;
+  wellingtonForecast?: number;
+  
+  // New fields (recommended)
+  auckland_properties?: number;
+  wellington_properties?: number;
+  auckland_forecast_total?: number;
+  wellington_forecast_total?: number;
+  auckland_forecast_90_percent?: number;
+  auckland_forecast_80_percent?: number;
+  auckland_forecast_60_percent?: number;
+  wellington_forecast_90_percent?: number;
+  wellington_forecast_80_percent?: number;
+  wellington_forecast_60_percent?: number;
+  message?: string;
+  created_at?: string;
 }
 
 interface DatabaseAnalysisState {
@@ -18,7 +32,8 @@ interface DatabaseAnalysisState {
   clearCache: () => void;
 }
 
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+// Cache for 24 hours
+const CACHE_DURATION = 24 * 60 * 60 * 1000;
 
 export const useDatabaseAnalysisStore = create<DatabaseAnalysisState>()(
   persist(
