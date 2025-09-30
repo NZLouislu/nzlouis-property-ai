@@ -21,8 +21,8 @@ jobs:
     - name: Install dependencies
       run: npm install
       
-    - name: Compile TypeScript script
-      run: npx ts-node scripts/updateDatabaseAnalysis.ts
+    - name: Run script
+      run: npx tsx scripts/updateDatabaseAnalysis.ts
       env:
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}

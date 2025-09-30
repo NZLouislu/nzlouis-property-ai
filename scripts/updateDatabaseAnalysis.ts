@@ -1,11 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_KEY!
-);
-
 async function updateDatabaseAnalysisStats() {
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!
+  );
+
   try {
     console.log('Starting database analysis stats update...');
     
@@ -56,4 +56,4 @@ async function updateDatabaseAnalysisStats() {
   }
 }
 
-updateDatabaseAnalysisStats();
+updateDatabaseAnalysisStats().catch(console.error);
