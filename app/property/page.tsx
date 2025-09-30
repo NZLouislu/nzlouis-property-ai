@@ -25,12 +25,13 @@ export default function PropertyPage() {
     hasNextPage,
   } = usePropertiesData(selectedCity, selectedSuburb === "all-suburbs" ? [] : [selectedSuburb]);
 
-  const propertiesData = data as { pages: Property[][] } | undefined;
+  const propertiesData = data as { pages: Array<{ data: Property[]; hasMore: boolean; total: number }> } | undefined;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          console.log("Loading next page...");
           fetchNextPage();
         }
       },
@@ -45,8 +46,10 @@ export default function PropertyPage() {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const properties: Property[] = propertiesData
-    ? propertiesData.pages.flatMap((page) => page)
+    ? propertiesData.pages.flatMap((page) => page.data).filter((property): property is Property => property !== null && property !== undefined && property.id !== undefined)
     : [];
+  
+  const totalProperties = propertiesData?.pages[0]?.total || 0;
 
   const handleLocationChange = (selection: { 
     region: string; 
@@ -65,7 +68,7 @@ export default function PropertyPage() {
       property.address.toLowerCase().includes(query) ||
       property.suburb.toLowerCase().includes(query) ||
       property.city.toLowerCase().includes(query) ||
-      (property.category && property.category.toLowerCase().includes(query))
+      (property.category?.toLowerCase().includes(query))
     );
   });
 
@@ -84,7 +87,7 @@ export default function PropertyPage() {
           textShadow: "0 2px 4px rgba(0,0,0,0.1)",
         }}
       >
-        All Properties
+        All Properties {totalProperties > 0 && `(${totalProperties})`}
       </h1>
 
       <div

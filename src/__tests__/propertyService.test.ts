@@ -1,5 +1,5 @@
 // propertyService.test.ts
-import { fetchPropertiesByCity } from "../services/propertyService";
+import { fetchPropertiesByCity, PropertyResponse } from "../services/propertyService";
 import { Property } from "../components/properties.type";
 
 // Mock the fetch function to simulate API responses
@@ -42,14 +42,22 @@ describe("fetchPropertiesByCity", () => {
       },
     ];
 
+    const mockResponse: PropertyResponse = {
+      data: mockProperties,
+      hasMore: true,
+      total: 100,
+      page: 0,
+      pageSize: 9
+    };
+
     // Mock the fetch function to return our mock data
-    (fetchPropertiesByCity as jest.MockedFunction<typeof fetchPropertiesByCity>).mockResolvedValue(mockProperties);
+    (fetchPropertiesByCity as jest.MockedFunction<typeof fetchPropertiesByCity>).mockResolvedValue(mockResponse);
 
     // Act
     const result = await fetchPropertiesByCity("Wellington City", 0, 9);
 
     // Assert
-    expect(result).toEqual(mockProperties);
+    expect(result).toEqual(mockResponse);
     expect(fetchPropertiesByCity).toHaveBeenCalledWith("Wellington City", 0, 9);
   });
 
@@ -82,14 +90,22 @@ describe("fetchPropertiesByCity", () => {
       },
     ];
 
+    const mockResponse: PropertyResponse = {
+      data: mockProperties,
+      hasMore: false,
+      total: 1,
+      page: 0,
+      pageSize: 9
+    };
+
     // Mock the fetch function to return our mock data
-    (fetchPropertiesByCity as jest.MockedFunction<typeof fetchPropertiesByCity>).mockResolvedValue(mockProperties);
+    (fetchPropertiesByCity as jest.MockedFunction<typeof fetchPropertiesByCity>).mockResolvedValue(mockResponse);
 
     // Act
     const result = await fetchPropertiesByCity("Wellington City", 0, 9, ["Khandallah"]);
 
     // Assert
-    expect(result).toEqual(mockProperties);
+    expect(result).toEqual(mockResponse);
     expect(fetchPropertiesByCity).toHaveBeenCalledWith("Wellington City", 0, 9, ["Khandallah"]);
   });
 
@@ -122,14 +138,22 @@ describe("fetchPropertiesByCity", () => {
       },
     ];
 
+    const mockResponse: PropertyResponse = {
+      data: mockProperties,
+      hasMore: true,
+      total: 50,
+      page: 0,
+      pageSize: 9
+    };
+
     // Mock the fetch function to return our mock data
-    (fetchPropertiesByCity as jest.MockedFunction<typeof fetchPropertiesByCity>).mockResolvedValue(mockProperties);
+    (fetchPropertiesByCity as jest.MockedFunction<typeof fetchPropertiesByCity>).mockResolvedValue(mockResponse);
 
     // Act
     const result = await fetchPropertiesByCity("Wellington City", 0, 9, []);
 
     // Assert
-    expect(result).toEqual(mockProperties);
+    expect(result).toEqual(mockResponse);
     expect(fetchPropertiesByCity).toHaveBeenCalledWith("Wellington City", 0, 9, []);
   });
 
@@ -162,14 +186,22 @@ describe("fetchPropertiesByCity", () => {
       },
     ];
 
+    const mockResponse: PropertyResponse = {
+      data: mockProperties,
+      hasMore: true,
+      total: 50,
+      page: 0,
+      pageSize: 9
+    };
+
     // Mock the fetch function to return our mock data
-    (fetchPropertiesByCity as jest.MockedFunction<typeof fetchPropertiesByCity>).mockResolvedValue(mockProperties);
+    (fetchPropertiesByCity as jest.MockedFunction<typeof fetchPropertiesByCity>).mockResolvedValue(mockResponse);
 
     // Act
     const result = await fetchPropertiesByCity("Wellington City", 0, 9, null);
 
     // Assert
-    expect(result).toEqual(mockProperties);
+    expect(result).toEqual(mockResponse);
     expect(fetchPropertiesByCity).toHaveBeenCalledWith("Wellington City", 0, 9, null);
   });
 });

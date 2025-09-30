@@ -1,38 +1,48 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { fetchPropertiesByCity } from "../services/propertyService";
+import { fetchPropertiesByCity, PropertyResponse } from "../services/propertyService";
 import { Property } from "../components/properties.type";
 import { Region } from "../components/properties.type";
 import { useState, useEffect } from "react";
 
 export function usePropertiesData(city: string, suburbs?: string[]) {
   const pageSize = 9;
-  return useInfiniteQuery<Property[], Error>({
-    queryKey: ["properties", city, suburbs],
+  const filteredSuburbs = suburbs?.filter((suburb) => suburb !== "") || [];
+  
+  return useInfiniteQuery<PropertyResponse, Error>({
+    queryKey: ["properties", city, filteredSuburbs.sort().join(","), 'v4'], // v4 for new response format
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       try {
         if (!city) {
-          return [];
+          return { data: [], hasMore: false, total: 0, page: 0, pageSize };
         }
         
-        const filteredSuburbs = suburbs?.filter((suburb) => suburb !== "");
-        return await fetchPropertiesByCity(
+        const result = await fetchPropertiesByCity(
           city,
           pageParam as number,
           pageSize,
-          filteredSuburbs || null
+          filteredSuburbs.length > 0 ? filteredSuburbs : null
         );
+        
+        return result;
       } catch (error: any) {
         console.error("Error fetching properties:", error);
-        return [];
+        throw error;
       }
     },
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage && lastPage.length === pageSize ? allPages.length : undefined,
+    getNextPageParam: (lastPage, allPages) => {
+      // Use the hasMore flag from the API response
+      if (lastPage && lastPage.hasMore) {
+        return allPages.length; // Return the next page number
+      }
+      return undefined; // No more pages
+    },
     retry: 1,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // Reduced to 2 minutes for better data freshness
+    gcTime: 5 * 60 * 1000, // Keep unused data in cache for 5 minutes
     enabled: !!city,
     refetchOnWindowFocus: false,
+    refetchOnMount: true, // Force refetch on component mount to ensure fresh pagination state
   });
 }
 

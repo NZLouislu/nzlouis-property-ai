@@ -5,7 +5,7 @@ import { Property } from "../components/properties.type";
 export function useForecastData(city: string, suburbs?: string[]) {
   const pageSize = 9;
   return useInfiniteQuery<Property[], Error>({
-    queryKey: ["forecast", city, suburbs],
+    queryKey: ["forecast", city, suburbs, 'v3'], // Add version to force cache refresh
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       try {

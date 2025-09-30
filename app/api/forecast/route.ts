@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import redis from "@/src/services/redisClient";
 
 // Supabase client (server-side only)
 const supabase = createClient(
@@ -13,6 +14,20 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get("page") || "0");
   const pageSize = parseInt(searchParams.get("pageSize") || "9");
   const suburbs = searchParams.get("suburbs")?.split(",") || [];
+
+  // Create cache key
+  const cacheKey = `forecast:${city}:${page}:${pageSize}:${suburbs.sort().join(",")}`;
+  
+  try {
+    // Try to get data from cache
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      console.log("Returning cached data for key:", cacheKey);
+      return NextResponse.json(cachedData);
+    }
+  } catch (cacheError) {
+    console.error("Cache read error:", cacheError);
+  }
 
   try {
     let query = supabase
@@ -48,6 +63,13 @@ export async function GET(request: Request) {
         { error: `Failed to fetch forecast properties: ${error.message}` },
         { status: 500 }
       );
+    }
+
+    // Cache the data for 24 hours
+    try {
+      await redis.setex(cacheKey, 24 * 60 * 60, data);
+    } catch (cacheError) {
+      console.error("Cache write error:", cacheError);
     }
 
     return NextResponse.json(data);
