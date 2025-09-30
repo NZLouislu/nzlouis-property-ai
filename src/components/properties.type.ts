@@ -32,3 +32,20 @@ export interface Property {
   is_currently_rented: boolean;
   cover_image_url?: string;
 }
+
+export interface Region {
+  id: string;
+  name: string;
+  cities: City[];
+}
+
+export interface City {
+  id: string;
+  name: string;
+  suburbs: Suburb[];
+}
+
+export interface Suburb {
+  id: string;
+  name: string;
+}

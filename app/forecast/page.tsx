@@ -5,12 +5,13 @@ import { useForecastData } from "@/src/hooks/useForecastData";
 import { Property } from "@/src/components/properties.type";
 import PropertyList from "@/src/components/Properties/PropertyList";
 import { FaSearch } from "react-icons/fa";
+import LocationSelector from "@/src/components/LocationSelector";
 
 export default function ForecastPage() {
   const lastPropertyElementRef = useRef<HTMLDivElement>(null);
   const [selectedRegion, setSelectedRegion] = useState("Wellington");
   const [selectedCity, setSelectedCity] = useState("Wellington City");
-  const [selectedSuburb, setSelectedSuburb] = useState<string>("");
+  const [selectedSuburb, setSelectedSuburb] = useState<string>("all-suburbs");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
@@ -22,7 +23,7 @@ export default function ForecastPage() {
     error,
     fetchNextPage,
     hasNextPage,
-  } = useForecastData(selectedCity, [selectedSuburb]);
+  } = useForecastData(selectedCity, selectedSuburb === "all-suburbs" ? [] : [selectedSuburb]);
 
   const propertiesData = data as { pages: Property[][] } | undefined;
 
@@ -47,37 +48,14 @@ export default function ForecastPage() {
     ? propertiesData.pages.flatMap((page) => page)
     : [];
 
-  const wellingtonSuburbs: string[] = [
-    "Khandallah",
-    "Ngaio",
-    "Tawa",
-    "Newlands",
-    "Woodridge",
-    "Johnsonville",
-    "Churton Park",
-    "Kaiwharawhara",
-    "Karori",
-  ];
-
-  const aucklandSuburbs: string[] = [
-    "Auckland City Centre",
-    "Epsom",
-    "Mount Eden",
-    "Remuera",
-    "Parnell",
-    "Newmarket",
-    "Greenlane",
-    "Panmure",
-    "Glen Innes",
-  ];
-
-  const getSuburbsForCity = () => {
-    if (selectedCity === "Wellington City") {
-      return wellingtonSuburbs;
-    } else if (selectedCity === "Auckland") {
-      return aucklandSuburbs;
-    }
-    return [];
+  const handleLocationChange = (selection: { 
+    region: string; 
+    city: string; 
+    suburb: string 
+  }) => {
+    setSelectedRegion(selection.region);
+    setSelectedCity(selection.city);
+    setSelectedSuburb(selection.suburb);
   };
 
   const filteredProperties: Property[] = properties.filter((property) => {
@@ -150,58 +128,12 @@ export default function ForecastPage() {
           />
         </div>
 
-        <select
-          value={selectedRegion}
-          onChange={(e) => {
-            setSelectedRegion(e.target.value);
-            if (e.target.value === "Wellington") {
-              setSelectedCity("Wellington City");
-            } else if (e.target.value === "Auckland") {
-              setSelectedCity("Auckland");
-            }
-            setSelectedSuburb("");
-          }}
-          style={{
-            padding: "14px 18px",
-            borderRadius: "10px",
-            border: "2px solid #e2e8f0",
-            fontSize: "16px",
-            minWidth: "220px",
-            backgroundColor: "#fff",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-            transition: "all 0.2s",
-            cursor: "pointer",
-          }}
-        >
-          <option value="">Select Region</option>
-          <option value="Wellington">Wellington</option>
-          <option value="Auckland">Auckland</option>
-        </select>
-
-        {selectedCity && (
-          <select
-            value={selectedSuburb}
-            onChange={(e) => setSelectedSuburb(e.target.value)}
-            style={{
-              padding: "14px 18px",
-              borderRadius: "10px",
-              border: "2px solid #e2e8f0",
-              fontSize: "16px",
-              minWidth: "220px",
-              backgroundColor: "#fff",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-              transition: "all 0.2s",
-              cursor: "pointer",
-            }}
-          >
-            <option value="">All Suburbs</option>
-            {getSuburbsForCity().map((suburb) => (
-              <option key={suburb} value={suburb}>
-                {suburb}
-              </option>
-            ))}
-          </select>
-        )}
+        <LocationSelector 
+          onSelectionChange={handleLocationChange}
+          defaultRegion="Wellington"
+          defaultCity="Wellington City"
+          defaultSuburb="all-suburbs"
+        />
       </div>
 
       <PropertyList
