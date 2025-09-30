@@ -19,6 +19,7 @@ export async function GET(request: Request) {
       .from("properties_with_latest_status")
       .select("*")
       .eq("city", city)
+      .order("confidence_score", { ascending: false })
       .range(page * pageSize, (page + 1) * pageSize - 1);
 
     // Apply filter only when suburbs is not empty and does not contain empty string
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
       sqlQuery += ` AND suburb IN (${suburbsList})`;
     }
     
-    sqlQuery += ` LIMIT ${pageSize} OFFSET ${page * pageSize}`;
+    sqlQuery += ` ORDER BY confidence_score DESC LIMIT ${pageSize} OFFSET ${page * pageSize}`;
     
     const { data, error } = await query;
 
