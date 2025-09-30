@@ -307,6 +307,42 @@ const PropertyCard: React.FC<{
                 {property.last_sold_date})
               </span>
             </div>
+            {property.confidence_score && (
+              <div
+                style={
+                  {
+                    backgroundColor:
+                      property.confidence_score > 0.7
+                        ? "#dcfce7"
+                        : property.confidence_score > 0.5
+                        ? "#fef9c3"
+                        : "#fee2e2",
+                    color:
+                      property.confidence_score > 0.7
+                        ? "#166534"
+                        : property.confidence_score > 0.5
+                        ? "#854d0e"
+                        : "#991b1b",
+                    padding: "6px 12px",
+                    borderRadius: "20px",
+                    fontSize: "0.85rem",
+                    fontWeight: "600",
+                    border: `1px solid ${
+                      property.confidence_score > 0.7
+                        ? "#bbf7d0"
+                        : property.confidence_score > 0.5
+                        ? "#fde047"
+                        : "#fecaca"
+                    }`,
+                    marginTop: "10px",
+                    display: "inline-block",
+                  }
+                }
+              >
+                {Math.round(property.confidence_score * 100)}%
+                confidence
+              </div>
+            )}
           </div>
         </div>
 
