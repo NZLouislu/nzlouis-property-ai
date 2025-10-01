@@ -49,6 +49,15 @@ jobs:
             let title = '';
             let description = '';
             let acceptanceCriteria = [];
+            let storyId = '';
+            
+            // Extract story ID
+            for (let i = 0; i < lines.length; i++) {
+              if (lines[i].startsWith('### Story ID')) {
+                storyId = lines[i + 1].trim();
+                break;
+              }
+            }
             
             // Extract title (assumed to be the first H2 header)
             for (let i = 0; i < lines.length; i++) {
@@ -88,7 +97,15 @@ jobs:
               }
             }
             
+            // If no story ID found, generate one from file name
+            if (!storyId) {
+              const fileName = filePath.split('/').pop().replace('.md', '');
+              const repositoryName = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : 'nzlouis-property-ai';
+              storyId = `${repositoryName}-${fileName}`;
+            }
+            
             return {
+              storyId,
               title,
               description: description.trim(),
               acceptanceCriteria
@@ -101,11 +118,6 @@ jobs:
                 authorization: `Bearer ${process.env.GITHUB_TOKEN}`
               }
             });
-            
-            // Generate ID from repository name and file name
-            const fileName = filePath.split('/').pop().replace('.md', '');
-            const repositoryName = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : 'nzlouis-property-ai';
-            const storyId = `${repositoryName}-${fileName}`;
             
             // Create project item using GitHub GraphQL API
             const addItemMutation = gql`
