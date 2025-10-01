@@ -2,7 +2,7 @@
 
 ### Story ID
 
-nzlouis-property-ai-forecast-like-functionality
+nzlouis-property-ai-forecast-like-function
 
 ### Description
 
