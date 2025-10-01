@@ -293,6 +293,35 @@ jobs:
             }
           }
           
+          // Function to create a new project item
+          async function createProjectItem(client, projectId, storyData) {
+            console.log(`[create] Creating new item with title: ${storyData.title}`);
+            
+            const createItemMutation = gql`
+              mutation($projectId: ID!, $title: String!) {
+                addProjectV2ItemById(input: { projectId: $projectId, title: $title }) {
+                  item {
+                    id
+                  }
+                }
+              }
+            `;
+            
+            try {
+              const response = await client.request(createItemMutation, {
+                projectId: projectId,
+                title: storyData.title
+              });
+              
+              const newItemId = response.addProjectV2ItemById.item.id;
+              console.log(`[create] Successfully created new item with ID: ${newItemId}`);
+              return newItemId;
+            } catch (error) {
+              console.error(`[create] Error creating project item:`, error.message);
+              return null;
+            }
+          }
+          
           // Function to set additional fields on a newly created item
           async function setItemFields(client, projectId, itemId, storyData, storyId) {
             console.log(`[set-fields] Setting fields for item: ${itemId}`);
