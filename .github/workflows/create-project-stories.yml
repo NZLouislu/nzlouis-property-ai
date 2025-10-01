@@ -298,8 +298,8 @@ jobs:
             console.log(`[create] Creating new item with title: ${storyData.title}`);
             
             const addItemMutation = gql`
-              mutation($projectId: ID!, $content: String!) {
-                addProjectV2ItemById(input: { projectId: $projectId, content: $content }) {
+              mutation($projectId: ID!, $title: String!) {
+                addProjectV2ItemById(input: { projectId: $projectId, title: $title }) {
                   item {
                     id
                   }
@@ -310,7 +310,7 @@ jobs:
             try {
               const addItemResponse = await client.request(addItemMutation, {
                 projectId: projectId,
-                content: storyData.title
+                title: storyData.title
               });
               
               const itemId = addItemResponse.addProjectV2ItemById.item.id;
