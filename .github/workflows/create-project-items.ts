@@ -106,13 +106,13 @@ function parseStoryFile(filePath: string): {
     }
     
     // Add content to the appropriate section
-    if (currentSection === 'description' && line.trim() !== '' && !line.startsWith('###')) {
+    if (currentSection === 'description' && line.trim() !== '') {
       description += line + '\n';
       console.log(`[parse] Added to description: "${line}"`);
-    } else if (currentSection === 'acceptance' && line.trim() !== '' && !line.startsWith('###')) {
+    } else if (currentSection === 'acceptance' && line.trim() !== '') {
       acceptanceCriteria += line + '\n';
       console.log(`[parse] Added to acceptance criteria: "${line}"`);
-    } else if (currentSection === 'technical' && line.trim() !== '' && !line.startsWith('###')) {
+    } else if (currentSection === 'technical' && line.trim() !== '') {
       technicalImplementation += line + '\n';
       console.log(`[parse] Added to technical: "${line}"`);
     }
