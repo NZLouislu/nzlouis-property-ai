@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -24,15 +26,33 @@ jobs:
         uses: tj-actions/changed-files@v3
         with:
           separator: " "
+          # Compare the current commit with the previous commit
+          since_last_remote_commit: "true"
+          
+      - name: Debug changed files info
+        run: |
+          echo "[DEBUG] Any changed files: ${{ steps.changed-files.outputs.any_changed }}" >> create-project-stories.log
+          echo "[DEBUG] All changed files: ${{ steps.changed-files.outputs.all_changed_files }}" >> create-project-stories.log
+          echo "[DEBUG] Added files: ${{ steps.changed-files.outputs.added_files }}" >> create-project-stories.log
+          echo "[DEBUG] Modified files: ${{ steps.changed-files.outputs.modified_files }}" >> create-project-stories.log
+          echo "[DEBUG] Removed files: ${{ steps.changed-files.outputs.removed_files }}" >> create-project-stories.log
           
       - name: Prepare log file
         run: |
           echo "Create GitHub Project Stories workflow started at $(date)" > create-project-stories.log
+          echo "Commit SHA: ${{ github.sha }}" >> create-project-stories.log
+          echo "Ref: ${{ github.ref }}" >> create-project-stories.log
+          echo "Event name: ${{ github.event_name }}" >> create-project-stories.log
           echo "Any changed: ${{ steps.changed-files.outputs.any_changed }}" >> create-project-stories.log
           echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}" >> create-project-stories.log
           
+      - name: List stories directory
+        run: |
+          echo "[DEBUG] Listing stories directory contents:" >> create-project-stories.log
+          ls -la stories/ >> create-project-stories.log 2>&1 || echo "[DEBUG] stories directory does not exist" >> create-project-stories.log
+          
       - name: Create GitHub Project Stories
-        if: steps.changed-files.outputs.any_changed == 'true'
+        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PROJECT_ID: PVT_kwHOBFSaJM4BEcZZ
@@ -40,8 +60,24 @@ jobs:
           echo "[DEBUG] Starting project item creation process at $(date)" >> create-project-stories.log
           echo "[DEBUG] Project ID: $PROJECT_ID" >> create-project-stories.log
           echo "[DEBUG] Changed files: ${{ steps.changed-files.outputs.all_changed_files }}" >> create-project-stories.log
+          
+          # Even if no files changed, we process all story files to ensure sync
+          if [ "${{ steps.changed-files.outputs.any_changed }}" = "false" ]; then
+            echo "[INFO] No changed files detected, processing all story files" >> create-project-stories.log
+            ALL_STORY_FILES=$(find stories -name "*.md" -type f 2>/dev/null | tr '\n' ' ' | sed 's/ $//')
+            echo "[DEBUG] All story files: $ALL_STORY_FILES" >> create-project-stories.log
+            export CHANGED_FILES="$ALL_STORY_FILES"
+          else
+            echo "[INFO] Changed files detected" >> create-project-stories.log
+            export CHANGED_FILES="${{ steps.changed-files.outputs.all_changed_files }}"
+          fi
+          
+          # Prepare artifacts directory first
+          mkdir -p ./artifacts
+          
           # Install required dependencies
-          npm install marked graphql-request graphql
+          echo "[DEBUG] Installing dependencies" >> create-project-stories.log
+          npm install marked graphql-request graphql >> create-project-stories.log 2>&1
           
           # Create a script to parse markdown files and create/update GitHub Project items
           cat > create-project-items.js << 'EOF'
@@ -400,15 +436,14 @@ jobs:
           EOF
           
           # Execute the script with required environment variables
-          export CHANGED_FILES="${{ steps.changed-files.outputs.all_changed_files }}"
-          mkdir -p ./artifacts
-          touch create-project-stories.log
+          echo "[DEBUG] Executing Node.js script" >> create-project-stories.log
           node create-project-items.js 2>&1 | tee -a create-project-stories.log | tee ./artifacts/run.log
+          echo "[DEBUG] Node.js script execution completed" >> create-project-stories.log
           
-          # Prepare artifacts
+          # Copy script to artifacts
           cp create-project-items.js ./artifacts/
           echo "Logs uploaded to artifacts directory" > ./artifacts/artifact-info.txt
-          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}" >> ./artifacts/artifact-info.txt
+          echo "Changed files: $CHANGED_FILES" >> ./artifacts/artifact-info.txt
           
           echo "Artifacts ready in ./artifacts"
 
