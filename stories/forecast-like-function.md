@@ -10,16 +10,22 @@ Backlog
 
 ### Description
 
-As a user, I want to be able to like property cards on the forecast page so that I can save interesting properties for later review and analysis.
+Users experience issues with pagination when navigating away from and back to the "All suburbs" page. The pagination state needs to be properly maintained to allow seamless continuation of data loading.
 
 ### Acceptance Criteria
 
-- Users can click a "like" button/icon on each property card on the "/forecast" page
-- Likes are persisted in the backend database with user and property identifiers
-- Liked properties are displayed in a dedicated "Favorites" section/page
-- Users can remove likes from the favorites page
-- The like count is displayed on each card
-- The UI provides visual feedback when a card is liked/unliked
+#### Scenario 1: Basic Pagination
+
+1. Navigate to the "All suburbs" page
+2. Scroll to load multiple pages of data
+3. Verify that all pages load correctly without interruption
+
+#### Scenario 2: Navigation and Return
+
+1. Access "All suburbs" page and load 2 pages of data
+2. Navigate to a specific suburb page
+3. Return to the "All suburbs" page
+4. Verify that pagination continues from where it left off, allowing loading of page 3 and subsequent pages
 
 ### Technical Implementation
 
@@ -28,3 +34,6 @@ As a user, I want to be able to like property cards on the forecast page so that
 - Implement frontend components for displaying and managing likes
 - Add necessary service layer logic to handle like operations
 - Update property card components to include like functionality
+- Ensure pagination state is properly preserved during navigation
+- Implement proper cleanup of pagination state when needed
+- Test with various network conditions to ensure robustness
