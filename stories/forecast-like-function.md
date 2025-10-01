@@ -1,8 +1,8 @@
-## Story: Implement Like Functionality on Forecast
+## Story: Implement Like Functionality on Forecast Page
 
 ### Story ID
 
-nzlouis-property-ai-forecast-like
+nzlouis-property-ai-forecast-like-function
 
 ### Status
 
@@ -11,7 +11,7 @@ Backlog
 ### Description
 
 As a user, I want to be able to like property cards on the forecast page so that I can save interesting properties for later review and analysis.
-![alt text](image.png)
+<img width="395" height="480" alt="Image" src="https://images.corelogic.asia/768x512/filters:stretch()/assets/nz/perm/ergavsop3mi6pdppk636t3qs44?signature=3a23d04836c05217b7512bb2ba9239e21f3e7949d52ffa1b9ac25a33086b5dff" />
 
 Scenario 1: Like Property
 1. Navigate to the forecast page
