@@ -2,25 +2,26 @@ name: Database Analysis Weekly Update
 
 on:
   schedule:
-    - cron: '0 0 * * 1'  # Every Monday at 00:00 UTC
-  workflow_dispatch:  # Allow manual trigger
+  - cron: '0 0 * * 1' # Every Monday at 00:00 UTC
+  workflow_dispatch:
+    # Allow manual trigger
 
 jobs:
   update-stats:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-      
+
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '20'
-        
+
     - name: Install dependencies
       run: npm install
-      
+
     - name: Run script
       run: npx tsx scripts/updateDatabaseAnalysis.ts
       env:
