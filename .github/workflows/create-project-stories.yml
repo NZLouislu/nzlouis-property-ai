@@ -325,10 +325,10 @@ jobs:
               `;
               
               const issueBody = `## Description
-${storyData.description}
+                ${storyData.description}
 
-## Acceptance Criteria
-${storyData.acceptanceCriteria.join('\n')}`;
+                ## Acceptance Criteria
+                ${storyData.acceptanceCriteria.join('\n')}`;
               
               const issueResponse = await client.request(createIssueMutation, {
                 repositoryId: repositoryId,
@@ -480,7 +480,7 @@ ${storyData.acceptanceCriteria.join('\n')}`;
             process.exit(1);
           });
           EOF
-          
+
           # Execute the script with required environment variables
           echo "[DEBUG] Executing Node.js script" >> create-project-stories.log
           node create-project-items.cjs 2>&1 | tee -a create-project-stories.log | tee ./artifacts/run.log
