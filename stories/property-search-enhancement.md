@@ -1,5 +1,8 @@
 ## Story: Add Property Search and Filter Functionality
 
+### Story ID
+nzlouis-property-ai-property-search-enhancement
+
 ### Description
 As a user, I want to be able to search and filter properties by various criteria so that I can quickly find properties that match my specific requirements.
 
