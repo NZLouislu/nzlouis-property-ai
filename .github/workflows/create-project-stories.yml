@@ -347,22 +347,27 @@ jobs:
                 });
               }
               
-              // Set status to "Backlog"
+              // Set status to "Backlog" - add delay to ensure item is ready
               if (fields['Status']) {
                 const statusField = fields['Status'];
                 const backlogOption = statusField.options.find(option => option.name === 'Backlog');
                 
                 if (backlogOption) {
                   console.log(`[set-fields] Setting status to Backlog for item: ${itemId}`);
+                  await new Promise(resolve => setTimeout(resolve, 1000));
                   await client.request(updateItemSingleSelectMutation, {
                     projectId: projectId,
                     itemId: itemId,
                     fieldId: statusField.id,
                     value: backlogOption.id
                   });
+                  console.log(`[set-fields] Status set to Backlog successfully`);
                 } else {
                   console.log(`[set-fields] Backlog option not found for Status field`);
+                  console.log(`[set-fields] Available options: ${JSON.stringify(statusField.options)}`);
                 }
+              } else {
+                console.log(`[set-fields] Status field not found in project`);
               }
               
               console.log(`[set-fields] Successfully set all fields for item: ${itemId}`);
@@ -399,14 +404,16 @@ jobs:
             `;
             
             try {
-              // Update title (built-in field, doesn't need special handling)
-              console.log(`[update] Updating title for item: ${itemId}`);
-              await client.request(updateItemTextMutation, {
-                projectId: projectId,
-                itemId: itemId,
-                fieldId: 'PFIELD_TITLE', // Title field ID
-                value: storyData.title
-              });
+              // Update title field
+              if (fields['Title']) {
+                console.log(`[update] Updating title for item: ${itemId}`);
+                await client.request(updateItemTextMutation, {
+                  projectId: projectId,
+                  itemId: itemId,
+                  fieldId: fields['Title'].id,
+                  value: storyData.title
+                });
+              }
               
               // Update description field
               if (fields['Description']) {
@@ -443,9 +450,13 @@ jobs:
                     fieldId: statusField.id,
                     value: backlogOption.id
                   });
+                  console.log(`[update] Status updated to Backlog successfully`);
                 } else {
                   console.log(`[update] Backlog option not found for Status field`);
+                  console.log(`[update] Available options: ${JSON.stringify(statusField.options)}`);
                 }
+              } else {
+                console.log(`[update] Status field not found in project`);
               }
               
               console.log(`[update] Successfully updated item: ${itemId}`);
