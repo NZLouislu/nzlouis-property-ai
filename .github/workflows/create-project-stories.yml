@@ -250,6 +250,12 @@ jobs:
                           id
                           name
                           dataType
+                          ... on ProjectV2SingleSelectField {
+                            options {
+                              id
+                              name
+                            }
+                          }
                         }
                       }
                     }
@@ -262,10 +268,14 @@ jobs:
               const response = await client.request(query, { projectId });
               const fields = response.node.fields.nodes;
               
-              // Create a map of field names to field IDs
+              // Create a map of field names to field IDs and options
               const fieldMap = {};
               fields.forEach(field => {
-                fieldMap[field.name] = field.id;
+                fieldMap[field.name] = {
+                  id: field.id,
+                  dataType: field.dataType,
+                  options: field.options || []
+                };
               });
               
               console.log(`[fields] Retrieved ${fields.length} fields`);
@@ -281,9 +291,9 @@ jobs:
             console.log(`[set-fields] Setting fields for item: ${itemId}`);
             
             // Get project field IDs
-            const fieldIds = await getProjectFields(client, projectId);
+            const fields = await getProjectFields(client, projectId);
             
-            const updateItemMutation = gql`
+            const updateItemTextMutation = gql`
               mutation($projectId: ID!, $fieldId: ID!, $itemId: ID!, $value: String!) {
                 updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {text: $value} }) {
                   projectV2Item {
@@ -293,49 +303,66 @@ jobs:
               }
             `;
             
+            const updateItemSingleSelectMutation = gql`
+              mutation($projectId: ID!, $fieldId: ID!, $itemId: ID!, $value: String!) {
+                updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $value } }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `;
+            
             try {
               // Set description
-              if (fieldIds['Description']) {
+              if (fields['Description']) {
                 console.log(`[set-fields] Setting description for item: ${itemId}`);
-                await client.request(updateItemMutation, {
+                await client.request(updateItemTextMutation, {
                   projectId: projectId,
                   itemId: itemId,
-                  fieldId: fieldIds['Description'],
+                  fieldId: fields['Description'].id,
                   value: storyData.description
                 });
               }
               
               // Set acceptance criteria
-              if (fieldIds['Acceptance Criteria']) {
+              if (fields['Acceptance Criteria']) {
                 console.log(`[set-fields] Setting acceptance criteria for item: ${itemId}`);
-                await client.request(updateItemMutation, {
+                await client.request(updateItemTextMutation, {
                   projectId: projectId,
                   itemId: itemId,
-                  fieldId: fieldIds['Acceptance Criteria'],
+                  fieldId: fields['Acceptance Criteria'].id,
                   value: storyData.acceptanceCriteria.join('\n')
                 });
               }
               
               // Set Story ID
-              if (fieldIds['Story ID']) {
+              if (fields['Story ID']) {
                 console.log(`[set-fields] Setting Story ID (${storyId}) for item: ${itemId}`);
-                await client.request(updateItemMutation, {
+                await client.request(updateItemTextMutation, {
                   projectId: projectId,
                   itemId: itemId,
-                  fieldId: fieldIds['Story ID'],
+                  fieldId: fields['Story ID'].id,
                   value: storyId
                 });
               }
               
               // Set status to "Backlog"
-              if (fieldIds['Status']) {
-                console.log(`[set-fields] Setting status to Backlog for item: ${itemId}`);
-                await client.request(updateItemMutation, {
-                  projectId: projectId,
-                  itemId: itemId,
-                  fieldId: fieldIds['Status'],
-                  value: 'Backlog'
-                });
+              if (fields['Status']) {
+                const statusField = fields['Status'];
+                const backlogOption = statusField.options.find(option => option.name === 'Backlog');
+                
+                if (backlogOption) {
+                  console.log(`[set-fields] Setting status to Backlog for item: ${itemId}`);
+                  await client.request(updateItemSingleSelectMutation, {
+                    projectId: projectId,
+                    itemId: itemId,
+                    fieldId: statusField.id,
+                    value: backlogOption.id
+                  });
+                } else {
+                  console.log(`[set-fields] Backlog option not found for Status field`);
+                }
               }
               
               console.log(`[set-fields] Successfully set all fields for item: ${itemId}`);
@@ -349,11 +376,21 @@ jobs:
             console.log(`[update] Updating existing item: ${itemId}`);
             
             // Get project field IDs
-            const fieldIds = await getProjectFields(client, projectId);
+            const fields = await getProjectFields(client, projectId);
             
-            const updateItemMutation = gql`
+            const updateItemTextMutation = gql`
               mutation($projectId: ID!, $fieldId: ID!, $itemId: ID!, $value: String!) {
                 updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {text: $value} }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `;
+            
+            const updateItemSingleSelectMutation = gql`
+              mutation($projectId: ID!, $fieldId: ID!, $itemId: ID!, $value: String!) {
+                updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $value } }) {
                   projectV2Item {
                     id
                   }
@@ -364,7 +401,7 @@ jobs:
             try {
               // Update title (built-in field, doesn't need special handling)
               console.log(`[update] Updating title for item: ${itemId}`);
-              await client.request(updateItemMutation, {
+              await client.request(updateItemTextMutation, {
                 projectId: projectId,
                 itemId: itemId,
                 fieldId: 'PFIELD_TITLE', // Title field ID
@@ -372,36 +409,43 @@ jobs:
               });
               
               // Update description field
-              if (fieldIds['Description']) {
+              if (fields['Description']) {
                 console.log(`[update] Updating description for item: ${itemId}`);
-                await client.request(updateItemMutation, {
+                await client.request(updateItemTextMutation, {
                   projectId: projectId,
                   itemId: itemId,
-                  fieldId: fieldIds['Description'],
+                  fieldId: fields['Description'].id,
                   value: storyData.description
                 });
               }
               
               // Update acceptance criteria field
-              if (fieldIds['Acceptance Criteria']) {
+              if (fields['Acceptance Criteria']) {
                 console.log(`[update] Updating acceptance criteria for item: ${itemId}`);
-                await client.request(updateItemMutation, {
+                await client.request(updateItemTextMutation, {
                   projectId: projectId,
                   itemId: itemId,
-                  fieldId: fieldIds['Acceptance Criteria'],
+                  fieldId: fields['Acceptance Criteria'].id,
                   value: storyData.acceptanceCriteria.join('\n')
                 });
               }
               
               // Update status to "Backlog"
-              if (fieldIds['Status']) {
-                console.log(`[update] Updating status to Backlog for item: ${itemId}`);
-                await client.request(updateItemMutation, {
-                  projectId: projectId,
-                  itemId: itemId,
-                  fieldId: fieldIds['Status'],
-                  value: 'Backlog'
-                });
+              if (fields['Status']) {
+                const statusField = fields['Status'];
+                const backlogOption = statusField.options.find(option => option.name === 'Backlog');
+                
+                if (backlogOption) {
+                  console.log(`[update] Updating status to Backlog for item: ${itemId}`);
+                  await client.request(updateItemSingleSelectMutation, {
+                    projectId: projectId,
+                    itemId: itemId,
+                    fieldId: statusField.id,
+                    value: backlogOption.id
+                  });
+                } else {
+                  console.log(`[update] Backlog option not found for Status field`);
+                }
               }
               
               console.log(`[update] Successfully updated item: ${itemId}`);
