@@ -45,4 +45,3 @@ As a user, I want to be able to like property cards on the forecast page so that
 - Create a dedicated Favorites page/component to display liked properties
 - Implement visual feedback for liked/unliked states
 - Update the forecast page to display the number of likes for each property
-- Add appropriate error handling and validation for like operations
