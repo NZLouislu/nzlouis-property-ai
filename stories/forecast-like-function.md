@@ -4,6 +4,10 @@
 
 nzlouis-property-ai-forecast-like-function
 
+### Status
+
+Backlog
+
 ### Description
 
 As a user, I want to be able to like property cards on the forecast page so that I can save interesting properties for later review and analysis.
