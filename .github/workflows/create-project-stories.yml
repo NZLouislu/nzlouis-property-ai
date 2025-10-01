@@ -236,9 +236,52 @@ jobs:
             }
           }
           
-          // Function to update an existing project item
-          async function updateProjectItem(client, projectId, itemId, storyData) {
-            console.log(`[update] Updating existing item: ${itemId}`);
+          // Function to get project field IDs
+          async function getProjectFields(client, projectId) {
+            console.log(`[fields] Getting project fields for project: ${projectId}`);
+            
+            const query = gql`
+              query($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    fields(first: 100) {
+                      nodes {
+                        ... on ProjectV2Field {
+                          id
+                          name
+                          dataType
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+            
+            try {
+              const response = await client.request(query, { projectId });
+              const fields = response.node.fields.nodes;
+              
+              // Create a map of field names to field IDs
+              const fieldMap = {};
+              fields.forEach(field => {
+                fieldMap[field.name] = field.id;
+              });
+              
+              console.log(`[fields] Retrieved ${fields.length} fields`);
+              return fieldMap;
+            } catch (error) {
+              console.error(`[fields] Error getting project fields:`, error.message);
+              return {};
+            }
+          }
+          
+          // Function to set additional fields on a newly created item
+          async function setItemFields(client, projectId, itemId, storyData, storyId) {
+            console.log(`[set-fields] Setting fields for item: ${itemId}`);
+            
+            // Get project field IDs
+            const fieldIds = await getProjectFields(client, projectId);
             
             const updateItemMutation = gql`
               mutation($projectId: ID!, $fieldId: ID!, $itemId: ID!, $value: String!) {
@@ -251,7 +294,75 @@ jobs:
             `;
             
             try {
-              // Update title
+              // Set description
+              if (fieldIds['Description']) {
+                console.log(`[set-fields] Setting description for item: ${itemId}`);
+                await client.request(updateItemMutation, {
+                  projectId: projectId,
+                  itemId: itemId,
+                  fieldId: fieldIds['Description'],
+                  value: storyData.description
+                });
+              }
+              
+              // Set acceptance criteria
+              if (fieldIds['Acceptance Criteria']) {
+                console.log(`[set-fields] Setting acceptance criteria for item: ${itemId}`);
+                await client.request(updateItemMutation, {
+                  projectId: projectId,
+                  itemId: itemId,
+                  fieldId: fieldIds['Acceptance Criteria'],
+                  value: storyData.acceptanceCriteria.join('\n')
+                });
+              }
+              
+              // Set Story ID
+              if (fieldIds['Story ID']) {
+                console.log(`[set-fields] Setting Story ID (${storyId}) for item: ${itemId}`);
+                await client.request(updateItemMutation, {
+                  projectId: projectId,
+                  itemId: itemId,
+                  fieldId: fieldIds['Story ID'],
+                  value: storyId
+                });
+              }
+              
+              // Set status to "Backlog"
+              if (fieldIds['Status']) {
+                console.log(`[set-fields] Setting status to Backlog for item: ${itemId}`);
+                await client.request(updateItemMutation, {
+                  projectId: projectId,
+                  itemId: itemId,
+                  fieldId: fieldIds['Status'],
+                  value: 'Backlog'
+                });
+              }
+              
+              console.log(`[set-fields] Successfully set all fields for item: ${itemId}`);
+            } catch (error) {
+              console.error(`[set-fields] Error setting fields for item ${itemId}:`, error.message);
+            }
+          }
+          
+          // Function to update an existing project item
+          async function updateProjectItem(client, projectId, itemId, storyData) {
+            console.log(`[update] Updating existing item: ${itemId}`);
+            
+            // Get project field IDs
+            const fieldIds = await getProjectFields(client, projectId);
+            
+            const updateItemMutation = gql`
+              mutation($projectId: ID!, $fieldId: ID!, $itemId: ID!, $value: String!) {
+                updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {text: $value} }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `;
+            
+            try {
+              // Update title (built-in field, doesn't need special handling)
               console.log(`[update] Updating title for item: ${itemId}`);
               await client.request(updateItemMutation, {
                 projectId: projectId,
@@ -261,31 +372,37 @@ jobs:
               });
               
               // Update description field
-              console.log(`[update] Updating description for item: ${itemId}`);
-              await client.request(updateItemMutation, {
-                projectId: projectId,
-                itemId: itemId,
-                fieldId: 'FIELD_ID_DESCRIPTION',
-                value: storyData.description
-              });
+              if (fieldIds['Description']) {
+                console.log(`[update] Updating description for item: ${itemId}`);
+                await client.request(updateItemMutation, {
+                  projectId: projectId,
+                  itemId: itemId,
+                  fieldId: fieldIds['Description'],
+                  value: storyData.description
+                });
+              }
               
               // Update acceptance criteria field
-              console.log(`[update] Updating acceptance criteria for item: ${itemId}`);
-              await client.request(updateItemMutation, {
-                projectId: projectId,
-                itemId: itemId,
-                fieldId: 'FIELD_ID_ACCEPTANCE_CRITERIA',
-                value: storyData.acceptanceCriteria.join('\n')
-              });
+              if (fieldIds['Acceptance Criteria']) {
+                console.log(`[update] Updating acceptance criteria for item: ${itemId}`);
+                await client.request(updateItemMutation, {
+                  projectId: projectId,
+                  itemId: itemId,
+                  fieldId: fieldIds['Acceptance Criteria'],
+                  value: storyData.acceptanceCriteria.join('\n')
+                });
+              }
               
               // Update status to "Backlog"
-              console.log(`[update] Updating status to Backlog for item: ${itemId}`);
-              await client.request(updateItemMutation, {
-                projectId: projectId,
-                itemId: itemId,
-                fieldId: 'PFIELD_STATUS',
-                value: 'Backlog'
-              });
+              if (fieldIds['Status']) {
+                console.log(`[update] Updating status to Backlog for item: ${itemId}`);
+                await client.request(updateItemMutation, {
+                  projectId: projectId,
+                  itemId: itemId,
+                  fieldId: fieldIds['Status'],
+                  value: 'Backlog'
+                });
+              }
               
               console.log(`[update] Successfully updated item: ${itemId}`);
             } catch (error) {
@@ -354,63 +471,6 @@ jobs:
             } catch (error) {
               console.error(`[create] Error creating project item:`, error.message);
               return null;
-            }
-          }
-          
-          // Function to set additional fields on a newly created item
-          async function setItemFields(client, projectId, itemId, storyData, storyId) {
-            console.log(`[set-fields] Setting fields for item: ${itemId}`);
-            
-            const updateItemMutation = gql`
-              mutation($projectId: ID!, $fieldId: ID!, $itemId: ID!, $value: String!) {
-                updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {text: $value} }) {
-                  projectV2Item {
-                    id
-                  }
-                }
-              }
-            `;
-            
-            try {
-              // Set description
-              console.log(`[set-fields] Setting description for item: ${itemId}`);
-              await client.request(updateItemMutation, {
-                projectId: projectId,
-                itemId: itemId,
-                fieldId: 'FIELD_ID_DESCRIPTION',
-                value: storyData.description
-              });
-              
-              // Set acceptance criteria
-              console.log(`[set-fields] Setting acceptance criteria for item: ${itemId}`);
-              await client.request(updateItemMutation, {
-                projectId: projectId,
-                itemId: itemId,
-                fieldId: 'FIELD_ID_ACCEPTANCE_CRITERIA',
-                value: storyData.acceptanceCriteria.join('\n')
-              });
-              
-              // Set Story ID
-              console.log(`[set-fields] Setting Story ID (${storyId}) for item: ${itemId}`);
-              await client.request(updateItemMutation, {
-                projectId: projectId,
-                itemId: itemId,
-                fieldId: 'FIELD_ID_STORY_ID', // This needs to be replaced with the actual field ID
-                value: storyId
-              });
-              
-              // Set status to "Backlog"
-              console.log(`[set-fields] Setting status to Backlog for item: ${itemId}`);
-              await client.request(updateItemMutation, {
-                projectId: projectId,
-                itemId: itemId,
-                fieldId: 'PFIELD_STATUS', // Status field ID
-                value: 'Backlog'
-              });
-              
-              console.log(`[set-fields] Successfully set all fields for item: ${itemId}`);
-            } catch (error) {
-              console.error(`[set-fields] Error setting fields for item ${itemId}:`, error.message);
             }
           }
           
