@@ -275,6 +275,15 @@ async function getProjectFields(client: GraphQLClient, projectId: string): Promi
       console.log(`[fields] Field "${fieldName}": id=${field.id}, dataType=${field.dataType}, options=${field.options.length}`);
     });
     
+    // Check if required fields exist
+    const requiredFields = ['Description', 'Acceptance Criteria', 'Technical Implementation'];
+    const missingFields = requiredFields.filter(field => !fieldMap[field]);
+    
+    if (missingFields.length > 0) {
+      console.warn(`[fields] WARNING: Missing required fields in project: ${missingFields.join(', ')}`);
+      console.warn(`[fields] Please add these custom fields to your GitHub project for full functionality.`);
+    }
+    
     return fieldMap;
   } catch (error: any) {
     console.error(`[fields] Error getting project fields:`, error.message);
@@ -324,6 +333,7 @@ async function setItemFields(client: GraphQLClient, projectId: string, itemId: s
       });
     } else {
       console.log(`[set-fields] No description field found. Available fields: ${Object.keys(fields).join(', ')}`);
+      console.log(`[set-fields] To fully utilize this feature, please add a 'Description' custom field to your GitHub project.`);
     }
     
     // Set acceptance criteria - try multiple possible field names
@@ -340,6 +350,7 @@ async function setItemFields(client: GraphQLClient, projectId: string, itemId: s
       });
     } else {
       console.log(`[set-fields] No acceptance criteria field found. Available fields: ${Object.keys(fields).join(', ')}`);
+      console.log(`[set-fields] To fully utilize this feature, please add an 'Acceptance Criteria' custom field to your GitHub project.`);
     }
     
     // Set technical implementation/notes - try multiple possible field names
@@ -356,6 +367,7 @@ async function setItemFields(client: GraphQLClient, projectId: string, itemId: s
       });
     } else {
       console.log(`[set-fields] No technical field found. Available fields: ${Object.keys(fields).join(', ')}`);
+      console.log(`[set-fields] To fully utilize this feature, please add a 'Technical Implementation' custom field to your GitHub project.`);
     }
     
     // Set Story ID
@@ -410,7 +422,7 @@ async function setItemFields(client: GraphQLClient, projectId: string, itemId: s
       console.log(`[set-fields] Status field not found in project`);
     }
     
-    console.log(`[set-fields] Successfully set all fields for item: ${itemId}`);
+    console.log(`[set-fields] Successfully set all available fields for item: ${itemId}`);
   } catch (error: any) {
     console.error(`[set-fields] Error setting fields for item ${itemId}:`, error.message);
   }
@@ -473,6 +485,7 @@ async function updateProjectItem(client: GraphQLClient, projectId: string, itemI
       });
     } else {
       console.log(`[update] No description field found. Available fields: ${Object.keys(fields).join(', ')}`);
+      console.log(`[update] To fully utilize this feature, please add a 'Description' custom field to your GitHub project.`);
     }
     
     // Update acceptance criteria field
@@ -489,6 +502,7 @@ async function updateProjectItem(client: GraphQLClient, projectId: string, itemI
       });
     } else {
       console.log(`[update] No acceptance criteria field found. Available fields: ${Object.keys(fields).join(', ')}`);
+      console.log(`[update] To fully utilize this feature, please add an 'Acceptance Criteria' custom field to your GitHub project.`);
     }
     
     // Update technical implementation/notes field
@@ -505,6 +519,7 @@ async function updateProjectItem(client: GraphQLClient, projectId: string, itemI
       });
     } else {
       console.log(`[update] No technical field found. Available fields: ${Object.keys(fields).join(', ')}`);
+      console.log(`[update] To fully utilize this feature, please add a 'Technical Implementation' custom field to your GitHub project.`);
     }
     
     // Update status field
@@ -547,7 +562,7 @@ async function updateProjectItem(client: GraphQLClient, projectId: string, itemI
       console.log(`[update] Status field not found in project`);
     }
     
-    console.log(`[update] Successfully updated item: ${itemId}`);
+    console.log(`[update] Successfully updated available fields for item: ${itemId}`);
   } catch (error: any) {
     console.error(`[update] Error updating project item ${itemId}:`, error.message);
   }
