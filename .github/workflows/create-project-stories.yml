@@ -25,6 +25,12 @@ jobs:
         with:
           separator: " "
           
+      - name: Prepare log file
+        run: |
+          echo "Create GitHub Project Stories workflow started" > create-project-stories.log
+          echo "Any changed: ${{ steps.changed-files.outputs.any_changed }}" >> create-project-stories.log
+          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}" >> create-project-stories.log
+          
       - name: Create GitHub Project Stories
         if: steps.changed-files.outputs.any_changed == 'true'
         env:
@@ -206,14 +212,14 @@ jobs:
           
           # Execute the script with required environment variables
           export CHANGED_FILES="${{ steps.changed-files.outputs.all_changed_files }}"
-          node create-project-items.js
-          
-          # Upload logs as artifact
           mkdir -p ./artifacts
+          touch create-project-stories.log
+          node create-project-items.js | tee -a create-project-stories.log | tee ./artifacts/run.log > /dev/null
+          
+          # Prepare artifacts
           cp create-project-items.js ./artifacts/
-          cp create-project-items.js ./artifacts/logs.txt
           echo "Logs uploaded to artifacts directory" > ./artifacts/artifact-info.txt
-          echo "Artifact created: logs.txt"
+          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}" >> ./artifacts/artifact-info.txt
           
           # Upload artifacts
           echo "::set-output name=artifact_path::./artifacts"
@@ -221,7 +227,7 @@ jobs:
           echo "::set-output name=artifact_description::Logs from project stories creation workflow"
           
           # Use actions/upload-artifact to upload logs
-          npx @actions/upload-artifact@v3.0.0 --path ./artifacts --name project-stories-logs --description "Logs from project stories creation workflow"
+          echo "Artifacts ready in ./artifacts"
 
 
       - name: Upload logs
@@ -230,5 +236,7 @@ jobs:
         with:
           name: Create-GitHub-Project-Stories-${{ github.run_number }}
           path: |
-            artifacts/**
-          retention-days: 7  # Use actions/upload-artifact to upload artifacts
+            create-project-stories.log
+            ./artifacts
+          if-no-files-found: warn
+          retention-days: 7
