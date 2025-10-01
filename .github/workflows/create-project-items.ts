@@ -25,8 +25,13 @@ function parseStoryFile(filePath: string): {
   // Extract story ID
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith('### Story ID')) {
-      if (i + 1 < lines.length) {
-        storyId = lines[i + 1].trim();
+      let j = i + 1;
+      // Skip empty lines
+      while (j < lines.length && lines[j].trim() === '') {
+        j++;
+      }
+      if (j < lines.length) {
+        storyId = lines[j].trim();
         console.log(`[parse] found Story ID: ${storyId}`);
       }
       break;
@@ -36,8 +41,13 @@ function parseStoryFile(filePath: string): {
   // Extract status
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith('### Status')) {
-      if (i + 1 < lines.length) {
-        status = lines[i + 1].trim();
+      let j = i + 1;
+      // Skip empty lines
+      while (j < lines.length && lines[j].trim() === '') {
+        j++;
+      }
+      if (j < lines.length) {
+        status = lines[j].trim();
         console.log(`[parse] found Status: ${status}`);
       }
       break;
@@ -325,21 +335,6 @@ async function setItemFields(client: GraphQLClient, projectId: string, itemId: s
   `;
   
   try {
-    // Set title field
-    const titleFieldNames = ['Title', 'Name', 'Summary'];
-    const titleField = titleFieldNames.find(name => fields[name]);
-    if (titleField && fields[titleField]) {
-      console.log(`[set-fields] Setting title using field "${titleField}" for item: ${itemId}`);
-      await client.request(updateItemTextMutation, {
-        projectId: projectId,
-        itemId: itemId,
-        fieldId: fields[titleField].id,
-        value: storyData.title
-      });
-    } else {
-      console.log(`[set-fields] No title field found. Available fields: ${Object.keys(fields).join(', ')}`);
-    }
-    
     // Set description - try multiple possible field names
     const descriptionFieldNames = ['Description', 'Desc', 'Summary'];
     const descriptionField = descriptionFieldNames.find(name => fields[name]);
@@ -480,21 +475,6 @@ async function updateProjectItem(client: GraphQLClient, projectId: string, itemI
   `;
   
   try {
-    // Update title field
-    const titleFieldNames = ['Title', 'Name', 'Summary'];
-    const titleField = titleFieldNames.find(name => fields[name]);
-    if (titleField && fields[titleField]) {
-      console.log(`[update] Updating title using field "${titleField}" for item: ${itemId}`);
-      await client.request(updateItemTextMutation, {
-        projectId: projectId,
-        itemId: itemId,
-        fieldId: fields[titleField].id,
-        value: storyData.title
-      });
-    } else {
-      console.log(`[update] No title field found. Available fields: ${Object.keys(fields).join(', ')}`);
-    }
-    
     // Update description field
     const descriptionFieldNames = ['Description', 'Desc', 'Summary'];
     const descriptionField = descriptionFieldNames.find(name => fields[name]);
