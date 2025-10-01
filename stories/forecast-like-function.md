@@ -8,6 +8,10 @@ nzlouis-property-ai-forecast-like-function
 
 Backlog
 
+### Description
+
+As a user, I want to be able to like property cards on the forecast page so that I can save interesting properties for later review and analysis.
+
 ### Acceptance Criteria
 
 #### Scenario 1: Like Property
@@ -41,7 +45,3 @@ Backlog
 - Create a dedicated Favorites page/component to display liked properties
 - Implement visual feedback for liked/unliked states
 - Update the forecast page to display the number of likes for each property
-
-### Description
-
-As a user, I want to be able to like property cards on the forecast page so that I can save interesting properties for later review and analysis.
