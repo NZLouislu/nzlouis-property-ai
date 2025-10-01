@@ -97,14 +97,25 @@ jobs:
             
             let title = '';
             let description = '';
-            let acceptanceCriteria = [];
+            let acceptanceCriteria = '';
+            let technicalImplementation = '';
             let storyId = '';
+            let status = '';
             
             // Extract story ID
             for (let i = 0; i < lines.length; i++) {
               if (lines[i].startsWith('### Story ID')) {
                 storyId = lines[i + 1].trim();
                 console.log(`[parse] found Story ID: ${storyId}`);
+                break;
+              }
+            }
+            
+            // Extract status
+            for (let i = 0; i < lines.length; i++) {
+              if (lines[i].startsWith('### Status')) {
+                status = lines[i + 1].trim();
+                console.log(`[parse] found Status: ${status}`);
                 break;
               }
             }
@@ -118,33 +129,42 @@ jobs:
               }
             }
             
-            // Extract description (text between Description header and next header)
-            let inDescription = false;
-            let inAcceptanceCriteria = false;
+            // Extract sections
+            let currentSection = '';
             
             for (let i = 0; i < lines.length; i++) {
-              const line = lines[i].trim();
+              const line = lines[i];
               
+              // Check for section headers
               if (line.startsWith('### Description')) {
-                inDescription = true;
-                inAcceptanceCriteria = false;
+                currentSection = 'description';
                 continue;
               } else if (line.startsWith('### Acceptance Criteria')) {
-                inDescription = false;
-                inAcceptanceCriteria = true;
+                currentSection = 'acceptance';
                 continue;
-              } else if (line.startsWith('### ') && (inDescription || inAcceptanceCriteria)) {
-                inDescription = false;
-                inAcceptanceCriteria = false;
+              } else if (line.startsWith('### Technical Implementation')) {
+                currentSection = 'technical';
+                continue;
+              } else if (line.startsWith('### Technical Notes')) {
+                currentSection = 'technical';
+                continue;
+              } else if (line.startsWith('### ') && line.length > 4) {
+                // Other section headers, stop current section
+                currentSection = '';
+                continue;
+              } else if (line.startsWith('## ') && line.length > 3) {
+                // Main headers, stop current section
+                currentSection = '';
                 continue;
               }
               
-              if (inDescription && line !== '') {
-                description += line + ' ';
-              }
-              
-              if (inAcceptanceCriteria && line.startsWith('- ')) {
-                acceptanceCriteria.push(line.substring(2));
+              // Add content to the appropriate section
+              if (currentSection === 'description' && line.trim() !== '') {
+                description += line + '\n';
+              } else if (currentSection === 'acceptance' && line.trim() !== '') {
+                acceptanceCriteria += line + '\n';
+              } else if (currentSection === 'technical' && line.trim() !== '') {
+                technicalImplementation += line + '\n';
               }
             }
             
@@ -155,13 +175,19 @@ jobs:
               storyId = `${repositoryName}-${fileName}`;
             }
             
-            console.log(`[parse] AC count: ${acceptanceCriteria.length}`);
-            console.log(`[parse] summary: id=${storyId} title="${title}" descLen=${description.trim().length}`);
+            // Clean up the extracted content
+            description = description.trim();
+            acceptanceCriteria = acceptanceCriteria.trim();
+            technicalImplementation = technicalImplementation.trim();
+            
+            console.log(`[parse] summary: id=${storyId} title="${title}" descLen=${description.length} acLen=${acceptanceCriteria.length} techLen=${technicalImplementation.length}`);
             return {
               storyId,
               title,
-              description: description.trim(),
-              acceptanceCriteria
+              description,
+              acceptanceCriteria,
+              technicalImplementation,
+              status
             };
           }
           
@@ -332,7 +358,18 @@ jobs:
                   projectId: projectId,
                   itemId: itemId,
                   fieldId: fields['Acceptance Criteria'].id,
-                  value: storyData.acceptanceCriteria.join('\n')
+                  value: storyData.acceptanceCriteria
+                });
+              }
+              
+              // Set technical implementation/notes
+              if (fields['Technical Notes']) {
+                console.log(`[set-fields] Setting technical notes for item: ${itemId}`);
+                await client.request(updateItemTextMutation, {
+                  projectId: projectId,
+                  itemId: itemId,
+                  fieldId: fields['Technical Notes'].id,
+                  value: storyData.technicalImplementation
                 });
               }
               
@@ -347,8 +384,26 @@ jobs:
                 });
               }
               
-              // Set status to "Backlog" - add delay to ensure item is ready
-              if (fields['Status']) {
+              // Set status field
+              if (fields['Status'] && storyData.status) {
+                const statusField = fields['Status'];
+                const statusOption = statusField.options.find(option => option.name.toLowerCase() === storyData.status.toLowerCase());
+                
+                if (statusOption) {
+                  console.log(`[set-fields] Setting status to ${storyData.status} for item: ${itemId}`);
+                  await client.request(updateItemSingleSelectMutation, {
+                    projectId: projectId,
+                    itemId: itemId,
+                    fieldId: statusField.id,
+                    value: statusOption.id
+                  });
+                  console.log(`[set-fields] Status set to ${storyData.status} successfully`);
+                } else {
+                  console.log(`[set-fields] Status option ${storyData.status} not found for Status field`);
+                  console.log(`[set-fields] Available options: ${JSON.stringify(statusField.options)}`);
+                }
+              } else if (fields['Status']) {
+                // Default to "Backlog" if no status specified
                 const statusField = fields['Status'];
                 const backlogOption = statusField.options.find(option => option.name === 'Backlog');
                 
@@ -433,12 +488,41 @@ jobs:
                   projectId: projectId,
                   itemId: itemId,
                   fieldId: fields['Acceptance Criteria'].id,
-                  value: storyData.acceptanceCriteria.join('\n')
+                  value: storyData.acceptanceCriteria
                 });
               }
               
-              // Update status to "Backlog"
-              if (fields['Status']) {
+              // Update technical implementation/notes field
+              if (fields['Technical Notes']) {
+                console.log(`[update] Updating technical notes for item: ${itemId}`);
+                await client.request(updateItemTextMutation, {
+                  projectId: projectId,
+                  itemId: itemId,
+                  fieldId: fields['Technical Notes'].id,
+                  value: storyData.technicalImplementation
+                });
+              }
+              
+              // Update status field
+              if (fields['Status'] && storyData.status) {
+                const statusField = fields['Status'];
+                const statusOption = statusField.options.find(option => option.name.toLowerCase() === storyData.status.toLowerCase());
+                
+                if (statusOption) {
+                  console.log(`[update] Updating status to ${storyData.status} for item: ${itemId}`);
+                  await client.request(updateItemSingleSelectMutation, {
+                    projectId: projectId,
+                    itemId: itemId,
+                    fieldId: statusField.id,
+                    value: statusOption.id
+                  });
+                  console.log(`[update] Status updated to ${storyData.status} successfully`);
+                } else {
+                  console.log(`[update] Status option ${storyData.status} not found for Status field`);
+                  console.log(`[update] Available options: ${JSON.stringify(statusField.options)}`);
+                }
+              } else if (fields['Status']) {
+                // Default to "Backlog" if no status specified
                 const statusField = fields['Status'];
                 const backlogOption = statusField.options.find(option => option.name === 'Backlog');
                 
