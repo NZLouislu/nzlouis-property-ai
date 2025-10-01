@@ -277,12 +277,17 @@ async function getProjectFields(client: GraphQLClient, projectId: string): Promi
     });
     
     // Check if required fields exist
-    const requiredFields = ['Description', 'Acceptance Criteria', 'Technical Implementation'];
+    const requiredFields = ['Description', 'Acceptance Criteria', 'Technical Implementation', 'Story ID'];
     const missingFields = requiredFields.filter(field => !fieldMap[field]);
     
     if (missingFields.length > 0) {
       console.warn(`[fields] WARNING: Missing required fields in project: ${missingFields.join(', ')}`);
       console.warn(`[fields] Please add these custom fields to your GitHub project for full functionality.`);
+      console.warn(`[fields] Required field types:`);
+      console.warn(`[fields] - Description: Text field`);
+      console.warn(`[fields] - Acceptance Criteria: Text field`);
+      console.warn(`[fields] - Technical Implementation: Text field`);
+      console.warn(`[fields] - Story ID: Text field`);
     }
     
     return fieldMap;
@@ -320,6 +325,21 @@ async function setItemFields(client: GraphQLClient, projectId: string, itemId: s
   `;
   
   try {
+    // Set title field
+    const titleFieldNames = ['Title', 'Name', 'Summary'];
+    const titleField = titleFieldNames.find(name => fields[name]);
+    if (titleField && fields[titleField]) {
+      console.log(`[set-fields] Setting title using field "${titleField}" for item: ${itemId}`);
+      await client.request(updateItemTextMutation, {
+        projectId: projectId,
+        itemId: itemId,
+        fieldId: fields[titleField].id,
+        value: storyData.title
+      });
+    } else {
+      console.log(`[set-fields] No title field found. Available fields: ${Object.keys(fields).join(', ')}`);
+    }
+    
     // Set description - try multiple possible field names
     const descriptionFieldNames = ['Description', 'Desc', 'Summary'];
     const descriptionField = descriptionFieldNames.find(name => fields[name]);
@@ -380,6 +400,9 @@ async function setItemFields(client: GraphQLClient, projectId: string, itemId: s
         fieldId: fields['Story ID'].id,
         value: storyId
       });
+    } else {
+      console.log(`[set-fields] No Story ID field found. Available fields: ${Object.keys(fields).join(', ')}`);
+      console.log(`[set-fields] To fully utilize this feature, please add a 'Story ID' custom field to your GitHub project.`);
     }
     
     // Set status field
@@ -521,6 +544,20 @@ async function updateProjectItem(client: GraphQLClient, projectId: string, itemI
     } else {
       console.log(`[update] No technical field found. Available fields: ${Object.keys(fields).join(', ')}`);
       console.log(`[update] To fully utilize this feature, please add a 'Technical Implementation' custom field to your GitHub project.`);
+    }
+    
+    // Update Story ID field
+    if (fields['Story ID']) {
+      console.log(`[update] Updating Story ID (${storyData.storyId}) for item: ${itemId}`);
+      await client.request(updateItemTextMutation, {
+        projectId: projectId,
+        itemId: itemId,
+        fieldId: fields['Story ID'].id,
+        value: storyData.storyId
+      });
+    } else {
+      console.log(`[update] No Story ID field found. Available fields: ${Object.keys(fields).join(', ')}`);
+      console.log(`[update] To fully utilize this feature, please add a 'Story ID' custom field to your GitHub project.`);
     }
     
     // Update status field
