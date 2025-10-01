@@ -1,7 +1,7 @@
 ## Story: Add Property Search and Filter Functionality
 
 ### Story ID
-nzlouis-property-ai-property-search-enhancement1
+nzlouis-property-ai-property-search-enhancement
 
 ### Status
 
