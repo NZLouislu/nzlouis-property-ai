@@ -120,6 +120,7 @@ function parseStoryFile(filePath: string): {
   description = description.trim();
   acceptanceCriteria = acceptanceCriteria.trim();
   technicalImplementation = technicalImplementation.trim();
+  status = status.trim();
   
   console.log(`[parse] Final summary:`);
   console.log(`[parse] - Story ID: ${storyId}`);
@@ -399,10 +400,10 @@ async function setItemFields(client: GraphQLClient, projectId: string, itemId: s
         console.log(`[set-fields] Status option ${storyData.status} not found for Status field`);
         console.log(`[set-fields] Available options: ${JSON.stringify(statusField.options)}`);
       }
-    } else if (fields['Status']) {
+    } else if (fields['Status'] && !storyData.status) {
       // Default to "Backlog" if no status specified
       const statusField = fields['Status'];
-      const backlogOption = statusField.options.find((option: any) => option.name === 'Backlog');
+      const backlogOption = statusField.options.find((option: any) => option.name.toLowerCase() === 'backlog');
       
       if (backlogOption) {
         console.log(`[set-fields] Setting status to Backlog for item: ${itemId}`);
@@ -540,10 +541,10 @@ async function updateProjectItem(client: GraphQLClient, projectId: string, itemI
         console.log(`[update] Status option ${storyData.status} not found for Status field`);
         console.log(`[update] Available options: ${JSON.stringify(statusField.options)}`);
       }
-    } else if (fields['Status']) {
+    } else if (fields['Status'] && !storyData.status) {
       // Default to "Backlog" if no status specified
       const statusField = fields['Status'];
-      const backlogOption = statusField.options.find((option: any) => option.name === 'Backlog');
+      const backlogOption = statusField.options.find((option: any) => option.name.toLowerCase() === 'backlog');
       
       if (backlogOption) {
         console.log(`[update] Updating status to Backlog for item: ${itemId}`);
