@@ -25,8 +25,10 @@ function parseStoryFile(filePath: string): {
   // Extract story ID
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith('### Story ID')) {
-      storyId = lines[i + 1].trim();
-      console.log(`[parse] found Story ID: ${storyId}`);
+      if (i + 1 < lines.length) {
+        storyId = lines[i + 1].trim();
+        console.log(`[parse] found Story ID: ${storyId}`);
+      }
       break;
     }
   }
@@ -34,8 +36,10 @@ function parseStoryFile(filePath: string): {
   // Extract status
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith('### Status')) {
-      status = lines[i + 1].trim();
-      console.log(`[parse] found Status: ${status}`);
+      if (i + 1 < lines.length) {
+        status = lines[i + 1].trim();
+        console.log(`[parse] found Status: ${status}`);
+      }
       break;
     }
   }
@@ -49,31 +53,44 @@ function parseStoryFile(filePath: string): {
     }
   }
   
-  // Extract sections
+  // Extract sections with improved logic
   let currentSection = '';
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    console.log(`[parse] Processing line ${i}: "${line}" (current section: ${currentSection})`);
     
-    // Check for section headers
+    // Check for content section headers
     if (line.startsWith('### Description')) {
       currentSection = 'description';
+      console.log(`[parse] Starting Description section`);
       continue;
     } else if (line.startsWith('### Acceptance Criteria')) {
       currentSection = 'acceptance';
+      console.log(`[parse] Starting Acceptance Criteria section`);
       continue;
-    } else if (line.startsWith('### Technical Implementation')) {
+    } else if (line.startsWith('### Technical Implementation') || line.startsWith('### Technical Notes')) {
       currentSection = 'technical';
+      console.log(`[parse] Starting Technical section`);
       continue;
-    } else if (line.startsWith('### Technical Notes')) {
-      currentSection = 'technical';
+    } else if (line.startsWith('### Story ID') || line.startsWith('### Status')) {
+      // These are metadata sections, don't affect content collection
+      console.log(`[parse] Found metadata section: ${line}`);
       continue;
-    } else if (line.startsWith('### ') && line.length > 4) {
-      // Other section headers, stop current section
-      currentSection = '';
+    } else if (line.startsWith('### ')) {
+      // Check if this is a known content section
+      const knownSections = ['Description', 'Acceptance Criteria', 'Technical Implementation', 'Technical Notes'];
+      const isKnownSection = knownSections.some(section => line.includes(section));
+      
+      if (!isKnownSection) {
+        // Unknown section header, stop current section
+        console.log(`[parse] Unknown section header, stopping current section: ${line}`);
+        currentSection = '';
+      }
       continue;
     } else if (line.startsWith('## ') && line.length > 3) {
       // Main headers, stop current section
+      console.log(`[parse] Main header found, stopping current section: ${line}`);
       currentSection = '';
       continue;
     }
@@ -81,10 +98,13 @@ function parseStoryFile(filePath: string): {
     // Add content to the appropriate section
     if (currentSection === 'description' && line.trim() !== '') {
       description += line + '\n';
+      console.log(`[parse] Added to description: "${line}"`);
     } else if (currentSection === 'acceptance' && line.trim() !== '') {
       acceptanceCriteria += line + '\n';
+      console.log(`[parse] Added to acceptance criteria: "${line}"`);
     } else if (currentSection === 'technical' && line.trim() !== '') {
       technicalImplementation += line + '\n';
+      console.log(`[parse] Added to technical: "${line}"`);
     }
   }
   
@@ -93,6 +113,7 @@ function parseStoryFile(filePath: string): {
     const fileName = filePath.split('/').pop()?.replace('.md', '') || '';
     const repositoryName = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : 'nzlouis-property-ai';
     storyId = `${repositoryName}-${fileName}`;
+    console.log(`[parse] Generated Story ID: ${storyId}`);
   }
   
   // Clean up the extracted content
@@ -100,7 +121,14 @@ function parseStoryFile(filePath: string): {
   acceptanceCriteria = acceptanceCriteria.trim();
   technicalImplementation = technicalImplementation.trim();
   
-  console.log(`[parse] summary: id=${storyId} title="${title}" descLen=${description.length} acLen=${acceptanceCriteria.length} techLen=${technicalImplementation.length}`);
+  console.log(`[parse] Final summary:`);
+  console.log(`[parse] - Story ID: ${storyId}`);
+  console.log(`[parse] - Title: "${title}"`);
+  console.log(`[parse] - Description length: ${description.length}`);
+  console.log(`[parse] - Acceptance Criteria length: ${acceptanceCriteria.length}`);
+  console.log(`[parse] - Technical Implementation length: ${technicalImplementation.length}`);
+  console.log(`[parse] - Status: ${status}`);
+  
   return {
     storyId,
     title,
@@ -225,6 +253,14 @@ async function getProjectFields(client: GraphQLClient, projectId: string): Promi
     });
     
     console.log(`[fields] Retrieved ${fields.length} fields`);
+    console.log(`[fields] Available field names: ${Object.keys(fieldMap).join(', ')}`);
+    
+    // Log detailed field information
+    Object.keys(fieldMap).forEach(fieldName => {
+      const field = fieldMap[fieldName];
+      console.log(`[fields] Field "${fieldName}": id=${field.id}, dataType=${field.dataType}, options=${field.options.length}`);
+    });
+    
     return fieldMap;
   } catch (error: any) {
     console.error(`[fields] Error getting project fields:`, error.message);
@@ -260,37 +296,52 @@ async function setItemFields(client: GraphQLClient, projectId: string, itemId: s
   `;
   
   try {
-    // Set description
-    if (fields['Description']) {
-      console.log(`[set-fields] Setting description for item: ${itemId}`);
+    // Set description - try multiple possible field names
+    const descriptionFieldNames = ['Description', 'Desc', 'Summary'];
+    const descriptionField = descriptionFieldNames.find(name => fields[name]);
+    if (descriptionField && fields[descriptionField]) {
+      console.log(`[set-fields] Setting description using field "${descriptionField}" for item: ${itemId}`);
+      console.log(`[set-fields] Description content length: ${storyData.description.length}`);
       await client.request(updateItemTextMutation, {
         projectId: projectId,
         itemId: itemId,
-        fieldId: fields['Description'].id,
+        fieldId: fields[descriptionField].id,
         value: storyData.description
       });
+    } else {
+      console.log(`[set-fields] No description field found. Available fields: ${Object.keys(fields).join(', ')}`);
     }
     
-    // Set acceptance criteria
-    if (fields['Acceptance Criteria']) {
-      console.log(`[set-fields] Setting acceptance criteria for item: ${itemId}`);
+    // Set acceptance criteria - try multiple possible field names
+    const acceptanceFieldNames = ['Acceptance Criteria', 'Acceptance', 'AC', 'Criteria'];
+    const acceptanceField = acceptanceFieldNames.find(name => fields[name]);
+    if (acceptanceField && fields[acceptanceField]) {
+      console.log(`[set-fields] Setting acceptance criteria using field "${acceptanceField}" for item: ${itemId}`);
+      console.log(`[set-fields] Acceptance criteria content length: ${storyData.acceptanceCriteria.length}`);
       await client.request(updateItemTextMutation, {
         projectId: projectId,
         itemId: itemId,
-        fieldId: fields['Acceptance Criteria'].id,
+        fieldId: fields[acceptanceField].id,
         value: storyData.acceptanceCriteria
       });
+    } else {
+      console.log(`[set-fields] No acceptance criteria field found. Available fields: ${Object.keys(fields).join(', ')}`);
     }
     
-    // Set technical implementation/notes
-    if (fields['Technical Notes']) {
-      console.log(`[set-fields] Setting technical notes for item: ${itemId}`);
+    // Set technical implementation/notes - try multiple possible field names
+    const technicalFieldNames = ['Technical Notes', 'Technical Implementation', 'Technical Details', 'Implementation', 'Tech Notes'];
+    const technicalField = technicalFieldNames.find(name => fields[name]);
+    if (technicalField && fields[technicalField]) {
+      console.log(`[set-fields] Setting technical notes using field "${technicalField}" for item: ${itemId}`);
+      console.log(`[set-fields] Technical implementation content length: ${storyData.technicalImplementation.length}`);
       await client.request(updateItemTextMutation, {
         projectId: projectId,
         itemId: itemId,
-        fieldId: fields['Technical Notes'].id,
+        fieldId: fields[technicalField].id,
         value: storyData.technicalImplementation
       });
+    } else {
+      console.log(`[set-fields] No technical field found. Available fields: ${Object.keys(fields).join(', ')}`);
     }
     
     // Set Story ID
@@ -380,47 +431,66 @@ async function updateProjectItem(client: GraphQLClient, projectId: string, itemI
   
   try {
     // Update title field
-    if (fields['Title']) {
-      console.log(`[update] Updating title for item: ${itemId}`);
+    const titleFieldNames = ['Title', 'Name', 'Summary'];
+    const titleField = titleFieldNames.find(name => fields[name]);
+    if (titleField && fields[titleField]) {
+      console.log(`[update] Updating title using field "${titleField}" for item: ${itemId}`);
       await client.request(updateItemTextMutation, {
         projectId: projectId,
         itemId: itemId,
-        fieldId: fields['Title'].id,
+        fieldId: fields[titleField].id,
         value: storyData.title
       });
+    } else {
+      console.log(`[update] No title field found. Available fields: ${Object.keys(fields).join(', ')}`);
     }
     
     // Update description field
-    if (fields['Description']) {
-      console.log(`[update] Updating description for item: ${itemId}`);
+    const descriptionFieldNames = ['Description', 'Desc', 'Summary'];
+    const descriptionField = descriptionFieldNames.find(name => fields[name]);
+    if (descriptionField && fields[descriptionField]) {
+      console.log(`[update] Updating description using field "${descriptionField}" for item: ${itemId}`);
+      console.log(`[update] Description content length: ${storyData.description.length}`);
       await client.request(updateItemTextMutation, {
         projectId: projectId,
         itemId: itemId,
-        fieldId: fields['Description'].id,
+        fieldId: fields[descriptionField].id,
         value: storyData.description
       });
+    } else {
+      console.log(`[update] No description field found. Available fields: ${Object.keys(fields).join(', ')}`);
     }
     
     // Update acceptance criteria field
-    if (fields['Acceptance Criteria']) {
-      console.log(`[update] Updating acceptance criteria for item: ${itemId}`);
+    const acceptanceFieldNames = ['Acceptance Criteria', 'Acceptance', 'AC', 'Criteria'];
+    const acceptanceField = acceptanceFieldNames.find(name => fields[name]);
+    if (acceptanceField && fields[acceptanceField]) {
+      console.log(`[update] Updating acceptance criteria using field "${acceptanceField}" for item: ${itemId}`);
+      console.log(`[update] Acceptance criteria content length: ${storyData.acceptanceCriteria.length}`);
       await client.request(updateItemTextMutation, {
         projectId: projectId,
         itemId: itemId,
-        fieldId: fields['Acceptance Criteria'].id,
+        fieldId: fields[acceptanceField].id,
         value: storyData.acceptanceCriteria
       });
+    } else {
+      console.log(`[update] No acceptance criteria field found. Available fields: ${Object.keys(fields).join(', ')}`);
     }
     
     // Update technical implementation/notes field
-    if (fields['Technical Notes']) {
-      console.log(`[update] Updating technical notes for item: ${itemId}`);
+    const technicalFieldNames = ['Technical Notes', 'Technical Implementation', 'Technical Details', 'Implementation', 'Tech Notes'];
+    const technicalField = technicalFieldNames.find(name => fields[name]);
+    if (technicalField && fields[technicalField]) {
+      console.log(`[update] Updating technical notes using field "${technicalField}" for item: ${itemId}`);
+      console.log(`[update] Technical implementation content length: ${storyData.technicalImplementation.length}`);
       await client.request(updateItemTextMutation, {
         projectId: projectId,
         itemId: itemId,
-        fieldId: fields['Technical Notes'].id,
+        fieldId: fields[technicalField].id,
         value: storyData.technicalImplementation
       });
+    } else {
+      console.log(`[update] No technical field found. Available fields: ${Object.keys(fields).join(', ')}`);
     }
     
     // Update status field
@@ -559,7 +629,27 @@ async function main(): Promise<void> {
       try {
         console.log(`[main] Processing file: ${file}`);
         const storyData = parseStoryFile(file);
-        console.log(`[main] Parsed story data: title="${storyData.title}", storyId="${storyData.storyId}"`);
+        console.log(`[main] Parsed story data:`);
+        console.log(`[main] - Title: "${storyData.title}"`);
+        console.log(`[main] - Story ID: "${storyData.storyId}"`);
+        console.log(`[main] - Status: "${storyData.status}"`);
+        console.log(`[main] - Description: ${storyData.description.length} characters`);
+        console.log(`[main] - Acceptance Criteria: ${storyData.acceptanceCriteria.length} characters`);
+        console.log(`[main] - Technical Implementation: ${storyData.technicalImplementation.length} characters`);
+        
+        // Validate that we have the essential content
+        if (!storyData.title) {
+          console.error(`[main] ERROR: No title found for file ${file}`);
+        }
+        if (!storyData.description) {
+          console.error(`[main] ERROR: No description found for file ${file}`);
+        }
+        if (!storyData.acceptanceCriteria) {
+          console.warn(`[main] WARNING: No acceptance criteria found for file ${file}`);
+        }
+        if (!storyData.technicalImplementation) {
+          console.warn(`[main] WARNING: No technical implementation found for file ${file}`);
+        }
         
         // Check if an item with this story ID already exists
         const existingItemId = await findExistingItem(client, projectId, storyData.storyId);
@@ -573,11 +663,15 @@ async function main(): Promise<void> {
           console.log(`[main] Creating new item for story: ${storyData.title}`);
           const newItemId = await createProjectItem(client, projectId, storyData);
           if (newItemId) {
+            console.log(`[main] Successfully created new item with ID: ${newItemId}`);
             await setItemFields(client, projectId, newItemId, storyData, storyData.storyId);
+          } else {
+            console.error(`[main] Failed to create new item for story: ${storyData.title}`);
           }
         }
       } catch (error: any) {
         console.error(`[main] Error processing ${file}:`, error.message);
+        console.error(`[main] Error stack:`, error.stack);
       }
     }
   }
