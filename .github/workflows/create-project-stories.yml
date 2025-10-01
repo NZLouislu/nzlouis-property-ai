@@ -230,5 +230,5 @@ jobs:
         with:
           name: Create-GitHub-Project-Stories-${{ github.run_number }}
           path: |
-            *.log
+            artifacts/**
           retention-days: 7  # Use actions/upload-artifact to upload artifacts
