@@ -10,22 +10,30 @@ Backlog
 
 ### Description
 
-Users experience issues with pagination when navigating away from and back to the "All suburbs" page. The pagination state needs to be properly maintained to allow seamless continuation of data loading.
+As a user, I want to be able to like property cards on the forecast page so that I can save interesting properties for later review and analysis.
 
 ### Acceptance Criteria
 
-#### Scenario 1: Basic Pagination
+#### Scenario 1: Like Property
 
-1. Navigate to the "All suburbs" page
-2. Scroll to load multiple pages of data
-3. Verify that all pages load correctly without interruption
+1. Navigate to the forecast page
+2. Locate a property card with a like button/icon
+3. Click the like button/icon
+4. Verify that the like is recorded and visually indicated
 
-#### Scenario 2: Navigation and Return
+#### Scenario 2: View Liked Properties
 
-1. Access "All suburbs" page and load 2 pages of data
-2. Navigate to a specific suburb page
-3. Return to the "All suburbs" page
-4. Verify that pagination continues from where it left off, allowing loading of page 3 and subsequent pages
+1. Like several properties on the forecast page
+2. Navigate to the Favorites section/page
+3. Verify that all liked properties are displayed
+4. Confirm that the like count is accurate
+
+#### Scenario 3: Unlike Property
+
+1. Navigate to the Favorites section/page
+2. Locate a previously liked property
+3. Click the like button/icon to unlike
+4. Verify that the property is removed from favorites
 
 ### Technical Implementation
 
@@ -34,6 +42,5 @@ Users experience issues with pagination when navigating away from and back to th
 - Implement frontend components for displaying and managing likes
 - Add necessary service layer logic to handle like operations
 - Update property card components to include like functionality
-- Ensure pagination state is properly preserved during navigation
-- Implement proper cleanup of pagination state when needed
-- Test with various network conditions to ensure robustness
+- Create a dedicated Favorites page/component to display liked properties
+- Implement visual feedback for liked/unliked states
