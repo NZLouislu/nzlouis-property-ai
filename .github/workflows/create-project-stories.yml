@@ -297,10 +297,11 @@ jobs:
           async function createProjectItem(client, projectId, storyData) {
             console.log(`[create] Creating new item with title: ${storyData.title}`);
             
-            const createItemMutation = gql`
-              mutation($projectId: ID!, $title: String!) {
-                addProjectV2ItemById(input: { projectId: $projectId, title: $title }) {
-                  item {
+            // First, create an issue to associate with the project item
+            const createIssueMutation = gql`
+              mutation($repositoryId: ID!, $title: String!, $body: String) {
+                createIssue(input: { repositoryId: $repositoryId, title: $title, body: $body }) {
+                  issue {
                     id
                   }
                 }
@@ -308,13 +309,47 @@ jobs:
             `;
             
             try {
-              const response = await client.request(createItemMutation, {
-                projectId: projectId,
-                title: storyData.title
+              // Get repository ID first
+              const repoInfoQuery = gql`
+                query($owner: String!, $name: String!) {
+                  repository(owner: $owner, name: $name) {
+                    id
+                  }
+                }
+              `;
+              
+              const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+              const repoInfo = await client.request(repoInfoQuery, { owner, name: repo });
+              const repositoryId = repoInfo.repository.id;
+              
+              // Create an issue for the story
+              const issueResponse = await client.request(createIssueMutation, {
+                repositoryId: repositoryId,
+                title: storyData.title,
+                body: storyData.description
               });
               
-              const newItemId = response.addProjectV2ItemById.item.id;
-              console.log(`[create] Successfully created new item with ID: ${newItemId}`);
+              const issueId = issueResponse.createIssue.issue.id;
+              console.log(`[create] Created issue with ID: ${issueId}`);
+              
+              // Now add the issue to the project
+              const addProjectItemMutation = gql`
+                mutation($projectId: ID!, $contentId: ID!) {
+                  addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                    item {
+                      id
+                    }
+                  }
+                }
+              `;
+              
+              const projectItemResponse = await client.request(addProjectItemMutation, {
+                projectId: projectId,
+                contentId: issueId
+              });
+              
+              const newItemId = projectItemResponse.addProjectV2ItemById.item.id;
+              console.log(`[create] Successfully created new project item with ID: ${newItemId}`);
               return newItemId;
             } catch (error) {
               console.error(`[create] Error creating project item:`, error.message);
