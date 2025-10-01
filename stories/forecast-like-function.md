@@ -1,8 +1,8 @@
-## Story: Implement Like Functionality on Forecast Page
+## Story: Implement Like Functionality on Forecast Card
 
 ### Story ID
 
-nzlouis-property-ai-forecast-like-function
+nzlouis-property-ai-forecast-like-functions
 
 ### Status
 
