@@ -2,7 +2,7 @@
 
 ### Story ID
 
-nzlouis-property-ai-forecast-like-function1
+nzlouis-property-ai-forecast-like-function
 
 ### Status
 
@@ -14,7 +14,7 @@ As a user, I want to be able to like property cards on the forecast page so that
 
 ### Acceptance Criteria
 
-- Users can click a "like" button/icon on each property card on the `/forecast` page
+- Users can click a "like" button/icon on each property card on the "/forecast" page
 - Likes are persisted in the backend database with user and property identifiers
 - Liked properties are displayed in a dedicated "Favorites" section/page
 - Users can remove likes from the favorites page
