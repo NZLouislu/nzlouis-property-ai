@@ -241,7 +241,7 @@ jobs:
             console.log(`[update] Updating existing item: ${itemId}`);
             
             const updateItemMutation = gql`
-              mutation($fieldId: ID!, $itemId: ID!, $value: String!) {
+              mutation($projectId: ID!, $fieldId: ID!, $itemId: ID!, $value: String!) {
                 updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {text: $value} }) {
                   projectV2Item {
                     id
@@ -293,83 +293,12 @@ jobs:
             }
           }
           
-          // Function to create a new project item
-          async function createProjectItem(client, projectId, storyData) {
-            console.log(`[create] Creating new item with title: ${storyData.title}`);
-            
-            try {
-              // Step 1: Get repository ID
-              const repositoryNameWithOwner = process.env.GITHUB_REPOSITORY || 'nzlouis/nzlouis-property-ai';
-              const [owner, repo] = repositoryNameWithOwner.split('/');
-              
-              const repoQuery = gql`
-                query($owner: String!, $name: String!) {
-                  repository(owner: $owner, name: $name) {
-                    id
-                  }
-                }
-              `;
-              
-              const repoResponse = await client.request(repoQuery, { owner, name: repo });
-              const repositoryId = repoResponse.repository.id;
-              
-              // Step 2: Create issue
-              const createIssueMutation = gql`
-                mutation($repositoryId: ID!, $title: String!, $body: String!) {
-                  createIssue(input: { repositoryId: $repositoryId, title: $title, body: $body }) {
-                    issue {
-                      id
-                    }
-                  }
-                }
-              `;
-              
-              const issueBody = `## Description
-                ${storyData.description}
-
-                ## Acceptance Criteria
-                ${storyData.acceptanceCriteria.join('\n')}`;
-              
-              const issueResponse = await client.request(createIssueMutation, {
-                repositoryId: repositoryId,
-                title: storyData.title,
-                body: issueBody
-              });
-              
-              const contentId = issueResponse.createIssue.issue.id;
-              console.log(`[create] Created issue with ID: ${contentId}`);
-              
-              // Step 3: Add issue to project
-              const addItemMutation = gql`
-                mutation($projectId: ID!, $contentId: ID!) {
-                  addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
-                    item {
-                      id
-                    }
-                  }
-                }
-              `;
-              
-              const addItemResponse = await client.request(addItemMutation, {
-                projectId: projectId,
-                contentId: contentId
-              });
-              
-              const itemId = addItemResponse.addProjectV2ItemById.item.id;
-              console.log(`[create] Added issue to project with item ID: ${itemId}`);
-              return itemId;
-            } catch (error) {
-              console.error(`[create] Error creating project item:`, error.message);
-              return null;
-            }
-          }
-          
           // Function to set additional fields on a newly created item
           async function setItemFields(client, projectId, itemId, storyData, storyId) {
             console.log(`[set-fields] Setting fields for item: ${itemId}`);
             
             const updateItemMutation = gql`
-              mutation($fieldId: ID!, $itemId: ID!, $value: String!) {
+              mutation($projectId: ID!, $fieldId: ID!, $itemId: ID!, $value: String!) {
                 updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {text: $value} }) {
                   projectV2Item {
                     id
