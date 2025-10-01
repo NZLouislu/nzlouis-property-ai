@@ -1,0 +1,170 @@
+name: Create GitHub Project Stories
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'stories/**'
+
+jobs:
+  create-stories:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          
+      - name: Get changed story files
+        id: changed-files
+        uses: tj-actions/changed-files@v3
+        with:
+          files: stories/**
+          
+      - name: Create GitHub Project Stories
+        if: steps.changed-files.outputs.any_changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECT_ID: PVT_kwHOBFSaJM4BEcZZ
+        run: |
+          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          # Install required dependencies
+          npm install marked graphql-request graphql
+          
+          # Create a script to parse markdown files and create GitHub Project items
+          cat > create-project-items.js << 'EOF'
+          const fs = require('fs');
+          const { marked } = require('marked');
+          const { GraphQLClient, gql } = require('graphql-request');
+          
+          // Function to parse story markdown file
+          function parseStoryFile(filePath) {
+            const content = fs.readFileSync(filePath, 'utf8');
+            const lines = content.split('\n');
+            
+            let title = '';
+            let description = '';
+            let acceptanceCriteria = [];
+            
+            // Extract title (assumed to be the first H2 header)
+            for (let i = 0; i < lines.length; i++) {
+              if (lines[i].startsWith('## Story: ')) {
+                title = lines[i].substring(10).trim();
+                break;
+              }
+            }
+            
+            // Extract description (text between Description header and next header)
+            let inDescription = false;
+            let inAcceptanceCriteria = false;
+            
+            for (let i = 0; i < lines.length; i++) {
+              const line = lines[i].trim();
+              
+              if (line.startsWith('### Description')) {
+                inDescription = true;
+                inAcceptanceCriteria = false;
+                continue;
+              } else if (line.startsWith('### Acceptance Criteria')) {
+                inDescription = false;
+                inAcceptanceCriteria = true;
+                continue;
+              } else if (line.startsWith('### ') && (inDescription || inAcceptanceCriteria)) {
+                inDescription = false;
+                inAcceptanceCriteria = false;
+                continue;
+              }
+              
+              if (inDescription && line !== '') {
+                description += line + ' ';
+              }
+              
+              if (inAcceptanceCriteria && line.startsWith('- ')) {
+                acceptanceCriteria.push(line.substring(2));
+              }
+            }
+            
+            return {
+              title,
+              description: description.trim(),
+              acceptanceCriteria
+            };
+          }
+          
+          async function createProjectItem(projectId, storyData, filePath) {
+            const client = new GraphQLClient('https://api.github.com/graphql', {
+              headers: {
+                authorization: `Bearer ${process.env.GITHUB_TOKEN}`
+              }
+            });
+            
+            // Generate ID from repository name and file name
+            const fileName = filePath.split('/').pop().replace('.md', '');
+            const repositoryName = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : 'nzlouis-property-ai';
+            const storyId = `${repositoryName}-${fileName}`;
+            
+            // Create project item using GitHub GraphQL API
+            const addItemMutation = gql`
+              mutation($projectId: ID!, $content: String!) {
+                addProjectV2ItemById(input: { projectId: $projectId, content: $content }) {
+                  item {
+                    id
+                  }
+                }
+              }
+            `;
+            
+            // Add item to project
+            try {
+              const addItemResponse = await client.request(addItemMutation, {
+                projectId: projectId,
+                content: storyData.title
+              });
+              
+              console.log(`Successfully added item to project for ${filePath}`);
+              const itemId = addItemResponse.addProjectV2ItemById.item.id;
+              
+              // Update item with detailed information
+              const updateItemMutation = gql`
+                mutation($fieldId: ID!, $itemId: ID!, $value: String!) {
+                  updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {text: $value} }) {
+                    projectV2Item {
+                      id
+                    }
+                  }
+                }
+              `;
+              
+              console.log(`Created project item with ID: ${itemId} for story: ${storyData.title}`);
+            } catch (error) {
+              console.error(`Error creating project item for ${filePath}:`, error.message);
+            }
+          }
+          
+          // Main execution
+          async function main() {
+            const changedFiles = process.env.CHANGED_FILES.split(' ');
+            const projectId = process.env.PROJECT_ID;
+            
+            for (const file of changedFiles) {
+              if (file.endsWith('.md')) {
+                try {
+                  const storyData = parseStoryFile(file);
+                  await createProjectItem(projectId, storyData, file);
+                } catch (error) {
+                  console.error(`Error processing ${file}:`, error.message);
+                }
+              }
+            }
+          }
+          
+          main();
+          EOF
+          
+          # Execute the script with required environment variables
+          export CHANGED_FILES="${{ steps.changed-files.outputs.all_changed_files }}"
+          node create-project-items.js
