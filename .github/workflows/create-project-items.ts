@@ -224,10 +224,24 @@ async function getProjectFields(client: GraphQLClient, projectId: string): Promi
                 id
                 name
                 dataType
-                ... on ProjectV2SingleSelectField {
-                  options {
+              }
+              ... on ProjectV2SingleSelectField {
+                id
+                name
+                dataType
+                options {
+                  id
+                  name
+                }
+              }
+              ... on ProjectV2IterationField {
+                id
+                name
+                dataType
+                configuration {
+                  iterations {
                     id
-                    name
+                    startDate
                   }
                 }
               }
