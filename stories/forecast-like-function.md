@@ -1,4 +1,4 @@
-## Story: Implement Like Functionality on Forecast Cards
+## Story: Implement Like Functionality on Forecast Page
 
 ### Story ID
 
