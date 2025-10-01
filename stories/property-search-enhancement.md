@@ -24,3 +24,4 @@ As a user, I want to be able to search and filter properties by various criteria
 - Add database indexes to optimize search performance
 - Store user filter preferences in localStorage or cookies
 - Implement responsive design for search components
+This story involves creating a search API endpoint that accepts multiple filter parameters, implementing frontend components for search input and filter controls, adding database indexes to optimize search performance, storing user filter preferences in localStorage or cookies, and implementing responsive design for search components.
