@@ -132,6 +132,7 @@ jobs:
             
             // Add item to project
             try {
+              console.log(`Attempting to add item to project for ${filePath} with title: ${storyData.title}`);
               const addItemResponse = await client.request(addItemMutation, {
                 projectId: projectId,
                 content: storyData.title
@@ -150,6 +151,32 @@ jobs:
                   }
                 }
               `;
+              
+              // Update description field
+              try {
+                console.log(`Updating description field for item ${itemId} with content: ${storyData.description}`);
+                await client.request(updateItemMutation, {
+                  fieldId: 'FIELD_ID_DESCRIPTION',
+                  itemId: itemId,
+                  value: storyData.description
+                });
+                console.log(`Successfully updated description field for item ${itemId}`);
+              } catch (error) {
+                console.error(`Error updating description field for item ${itemId}:`, error.message);
+              }
+              
+              // Update acceptance criteria field
+              try {
+                console.log(`Updating acceptance criteria field for item ${itemId} with content: ${storyData.acceptanceCriteria.join('\n')}`);
+                await client.request(updateItemMutation, {
+                  fieldId: 'FIELD_ID_ACCEPTANCE_CRITERIA',
+                  itemId: itemId,
+                  value: storyData.acceptanceCriteria.join('\n')
+                });
+                console.log(`Successfully updated acceptance criteria field for item ${itemId}`);
+              } catch (error) {
+                console.error(`Error updating acceptance criteria field for item ${itemId}:`, error.message);
+              }
               
               console.log(`Created project item with ID: ${itemId} for story: ${storyData.title}`);
             } catch (error) {
@@ -180,3 +207,18 @@ jobs:
           # Execute the script with required environment variables
           export CHANGED_FILES="${{ steps.changed-files.outputs.all_changed_files }}"
           node create-project-items.js
+          
+          # Upload logs as artifact
+          mkdir -p ./artifacts
+          cp create-project-items.js ./artifacts/
+          cp create-project-items.js ./artifacts/logs.txt
+          echo "Logs uploaded to artifacts directory" > ./artifacts/artifact-info.txt
+          echo "Artifact created: logs.txt"
+          
+          # Upload artifacts
+          echo "::set-output name=artifact_path::./artifacts"
+          echo "::set-output name=artifact_name::project-stories-logs"
+          echo "::set-output name=artifact_description::Logs from project stories creation workflow"
+          
+          # Use actions/upload-artifact to upload logs
+          npx @actions/upload-artifact@v3.0.0 --path ./artifacts --name project-stories-logs --description "Logs from project stories creation workflow"
