@@ -27,7 +27,7 @@ jobs:
           
       - name: Prepare log file
         run: |
-          echo "Create GitHub Project Stories workflow started" > create-project-stories.log
+          echo "Create GitHub Project Stories workflow started at $(date)" > create-project-stories.log
           echo "Any changed: ${{ steps.changed-files.outputs.any_changed }}" >> create-project-stories.log
           echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}" >> create-project-stories.log
           
@@ -37,11 +37,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PROJECT_ID: PVT_kwHOBFSaJM4BEcZZ
         run: |
-          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "[DEBUG] Starting project item creation process at $(date)" >> create-project-stories.log
+          echo "[DEBUG] Project ID: $PROJECT_ID" >> create-project-stories.log
+          echo "[DEBUG] Changed files: ${{ steps.changed-files.outputs.all_changed_files }}" >> create-project-stories.log
           # Install required dependencies
           npm install marked graphql-request graphql
           
-          # Create a script to parse markdown files and create GitHub Project items
+          # Create a script to parse markdown files and create/update GitHub Project items
           cat > create-project-items.js << 'EOF'
           const fs = require('fs');
           const { marked } = require('marked');
@@ -123,14 +125,138 @@ jobs:
             };
           }
           
-          async function createProjectItem(projectId, storyData, filePath) {
-            const client = new GraphQLClient('https://api.github.com/graphql', {
-              headers: {
-                authorization: `Bearer ${process.env.GITHUB_TOKEN}`
-              }
-            });
+          // Function to check if an item with the same story ID already exists
+          async function findExistingItem(client, projectId, storyId) {
+            console.log(`[find] Checking for existing item with storyId: ${storyId}`);
             
-            // Create project item using GitHub GraphQL API
+            const query = gql`
+              query($projectId: ID!, $first: Int!, $after: String) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    items(first: $first, after: $after) {
+                      nodes {
+                        id
+                        fieldValues(first: 100) {
+                          nodes {
+                            ... on ProjectV2ItemFieldTextValue {
+                              text
+                              field {
+                                ... on ProjectV2FieldCommon {
+                                  name
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      pageInfo {
+                        hasNextPage
+                        endCursor
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+            
+            try {
+              let hasNextPage = true;
+              let cursor = null;
+              
+              while (hasNextPage) {
+                const variables = {
+                  projectId: projectId,
+                  first: 100,
+                  after: cursor
+                };
+                
+                const response = await client.request(query, variables);
+                const items = response.node.items.nodes;
+                
+                for (const item of items) {
+                  // Look for an item with a matching Story ID field
+                  for (const fieldValue of item.fieldValues.nodes) {
+                    if (fieldValue.field && fieldValue.field.name === 'Story ID' && fieldValue.text === storyId) {
+                      console.log(`[find] Found existing item with matching Story ID: ${item.id}`);
+                      return item.id;
+                    }
+                  }
+                }
+                
+                const pageInfo = response.node.items.pageInfo;
+                hasNextPage = pageInfo.hasNextPage;
+                cursor = pageInfo.endCursor;
+              }
+              
+              console.log(`[find] No existing item found with storyId: ${storyId}`);
+              return null;
+            } catch (error) {
+              console.error(`[find] Error searching for existing item:`, error.message);
+              return null;
+            }
+          }
+          
+          // Function to update an existing project item
+          async function updateProjectItem(client, projectId, itemId, storyData) {
+            console.log(`[update] Updating existing item: ${itemId}`);
+            
+            const updateItemMutation = gql`
+              mutation($fieldId: ID!, $itemId: ID!, $value: String!) {
+                updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {text: $value} }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `;
+            
+            try {
+              // Update title
+              console.log(`[update] Updating title for item: ${itemId}`);
+              await client.request(updateItemMutation, {
+                projectId: projectId,
+                itemId: itemId,
+                fieldId: 'PFIELD_TITLE', // Title field ID
+                value: storyData.title
+              });
+              
+              // Update description field
+              console.log(`[update] Updating description for item: ${itemId}`);
+              await client.request(updateItemMutation, {
+                projectId: projectId,
+                itemId: itemId,
+                fieldId: 'FIELD_ID_DESCRIPTION',
+                value: storyData.description
+              });
+              
+              // Update acceptance criteria field
+              console.log(`[update] Updating acceptance criteria for item: ${itemId}`);
+              await client.request(updateItemMutation, {
+                projectId: projectId,
+                itemId: itemId,
+                fieldId: 'FIELD_ID_ACCEPTANCE_CRITERIA',
+                value: storyData.acceptanceCriteria.join('\n')
+              });
+              
+              // Update status to "Backlog"
+              console.log(`[update] Updating status to Backlog for item: ${itemId}`);
+              await client.request(updateItemMutation, {
+                projectId: projectId,
+                itemId: itemId,
+                fieldId: 'PFIELD_STATUS',
+                value: 'Backlog'
+              });
+              
+              console.log(`[update] Successfully updated item: ${itemId}`);
+            } catch (error) {
+              console.error(`[update] Error updating project item ${itemId}:`, error.message);
+            }
+          }
+          
+          // Function to create a new project item
+          async function createProjectItem(client, projectId, storyData) {
+            console.log(`[create] Creating new item with title: ${storyData.title}`);
+            
             const addItemMutation = gql`
               mutation($projectId: ID!, $content: String!) {
                 addProjectV2ItemById(input: { projectId: $projectId, content: $content }) {
@@ -141,72 +267,81 @@ jobs:
               }
             `;
             
-            // Add item to project
             try {
-              console.log(`Attempting to add item to project for ${filePath} with title: ${storyData.title} projectId=${projectId}`);
               const addItemResponse = await client.request(addItemMutation, {
                 projectId: projectId,
                 content: storyData.title
               });
               
-              console.log(`Successfully added item to project for ${filePath}`);
               const itemId = addItemResponse.addProjectV2ItemById.item.id;
-              console.log(`[project] created itemId=${itemId}`);
-              
-              // Update item with detailed information
-              const updateItemMutation = gql`
-                mutation($fieldId: ID!, $itemId: ID!, $value: String!) {
-                  updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {text: $value} }) {
-                    projectV2Item {
-                      id
-                    }
+              console.log(`[create] Created new item with ID: ${itemId}`);
+              return itemId;
+            } catch (error) {
+              console.error(`[create] Error creating project item:`, error.message);
+              return null;
+            }
+          }
+          
+          // Function to set additional fields on a newly created item
+          async function setItemFields(client, projectId, itemId, storyData, storyId) {
+            console.log(`[set-fields] Setting fields for item: ${itemId}`);
+            
+            const updateItemMutation = gql`
+              mutation($fieldId: ID!, $itemId: ID!, $value: String!) {
+                updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {text: $value} }) {
+                  projectV2Item {
+                    id
                   }
                 }
-              `;
-              
-              // Update description field
-              try {
-                {
-                  const desc = storyData.description || '';
-                  const preview = desc.split('\\n')[0].slice(0, 120);
-                  console.log(`[project] Updating description: itemId=${itemId} length=${desc.length} preview="${preview}"`);
-                }
-                await client.request(updateItemMutation, {
-                  fieldId: 'FIELD_ID_DESCRIPTION',
-                  itemId: itemId,
-                  value: storyData.description
-                });
-                console.log(`Successfully updated description field for item ${itemId}`);
-              } catch (error) {
-                console.error(`Error updating description field for item ${itemId}:`, error.message);
               }
+            `;
+            
+            try {
+              // Set description
+              console.log(`[set-fields] Setting description for item: ${itemId}`);
+              await client.request(updateItemMutation, {
+                projectId: projectId,
+                itemId: itemId,
+                fieldId: 'FIELD_ID_DESCRIPTION',
+                value: storyData.description
+              });
               
-              // Update acceptance criteria field
-              try {
-                {
-                  const acList = storyData.acceptanceCriteria || [];
-                  const first = acList[0] ? acList[0].slice(0, 120) : '';
-                  console.log(`[project] Updating AC: itemId=${itemId} lines=${acList.length} first="${first}"`);
-                }
-                await client.request(updateItemMutation, {
-                  fieldId: 'FIELD_ID_ACCEPTANCE_CRITERIA',
-                  itemId: itemId,
-                  value: storyData.acceptanceCriteria.join('\n')
-                });
-                console.log(`Successfully updated acceptance criteria field for item ${itemId}`);
-              } catch (error) {
-                console.error(`Error updating acceptance criteria field for item ${itemId}:`, error.message);
-              }
+              // Set acceptance criteria
+              console.log(`[set-fields] Setting acceptance criteria for item: ${itemId}`);
+              await client.request(updateItemMutation, {
+                projectId: projectId,
+                itemId: itemId,
+                fieldId: 'FIELD_ID_ACCEPTANCE_CRITERIA',
+                value: storyData.acceptanceCriteria.join('\n')
+              });
               
-              console.log(`Created project item with ID: ${itemId} for story: ${storyData.title}`);
+              // Set Story ID
+              console.log(`[set-fields] Setting Story ID (${storyId}) for item: ${itemId}`);
+              await client.request(updateItemMutation, {
+                projectId: projectId,
+                itemId: itemId,
+                fieldId: 'FIELD_ID_STORY_ID', // This needs to be replaced with the actual field ID
+                value: storyId
+              });
+              
+              // Set status to "Backlog"
+              console.log(`[set-fields] Setting status to Backlog for item: ${itemId}`);
+              await client.request(updateItemMutation, {
+                projectId: projectId,
+                itemId: itemId,
+                fieldId: 'PFIELD_STATUS', // Status field ID
+                value: 'Backlog'
+              });
+              
+              console.log(`[set-fields] Successfully set all fields for item: ${itemId}`);
             } catch (error) {
-              console.error(`Error creating project item for ${filePath}:`, error.message);
+              console.error(`[set-fields] Error setting fields for item ${itemId}:`, error.message);
             }
           }
           
           // Main execution
           async function main() {
-            console.log('[main] start');
+            console.log('[main] Starting main execution');
             const changedFilesRaw = process.env.CHANGED_FILES || '';
             console.log(`[main] CHANGED_FILES raw: "${changedFilesRaw}"`);
             const changedFiles = changedFilesRaw.split(' ').filter(Boolean);
@@ -214,40 +349,68 @@ jobs:
             const projectId = process.env.PROJECT_ID;
             console.log(`[main] projectId: ${projectId}`);
             
+            if (!projectId) {
+              console.error('[main] PROJECT_ID is not set');
+              process.exit(1);
+            }
+            
+            const client = new GraphQLClient('https://api.github.com/graphql', {
+              headers: {
+                authorization: `Bearer ${process.env.GITHUB_TOKEN}`
+              }
+            });
+            
             for (const file of changedFiles) {
               if (file.endsWith('.md')) {
                 try {
+                  console.log(`[main] Processing file: ${file}`);
                   const storyData = parseStoryFile(file);
-                  await createProjectItem(projectId, storyData, file);
+                  console.log(`[main] Parsed story data: title="${storyData.title}", storyId="${storyData.storyId}"`);
+                  
+                  // Check if an item with this story ID already exists
+                  const existingItemId = await findExistingItem(client, projectId, storyData.storyId);
+                  
+                  if (existingItemId) {
+                    // Update existing item
+                    console.log(`[main] Updating existing item with ID: ${existingItemId}`);
+                    await updateProjectItem(client, projectId, existingItemId, storyData);
+                  } else {
+                    // Create new item
+                    console.log(`[main] Creating new item for story: ${storyData.title}`);
+                    const newItemId = await createProjectItem(client, projectId, storyData);
+                    if (newItemId) {
+                      await setItemFields(client, projectId, newItemId, storyData, storyData.storyId);
+                    }
+                  }
                 } catch (error) {
-                  console.error(`Error processing ${file}:`, error.message);
+                  console.error(`[main] Error processing ${file}:`, error.message);
                 }
               }
             }
+            
+            console.log('[main] Finished processing all files');
           }
           
-          main();
+          main().then(() => {
+            console.log('[main] Script execution completed successfully');
+          }).catch((error) => {
+            console.error('[main] Script execution failed:', error.message);
+            process.exit(1);
+          });
           EOF
           
           # Execute the script with required environment variables
           export CHANGED_FILES="${{ steps.changed-files.outputs.all_changed_files }}"
           mkdir -p ./artifacts
           touch create-project-stories.log
-          node create-project-items.js | tee -a create-project-stories.log | tee ./artifacts/run.log > /dev/null
+          node create-project-items.js 2>&1 | tee -a create-project-stories.log | tee ./artifacts/run.log
           
           # Prepare artifacts
           cp create-project-items.js ./artifacts/
           echo "Logs uploaded to artifacts directory" > ./artifacts/artifact-info.txt
           echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}" >> ./artifacts/artifact-info.txt
           
-          # Upload artifacts
-          echo "::set-output name=artifact_path::./artifacts"
-          echo "::set-output name=artifact_name::project-stories-logs"
-          echo "::set-output name=artifact_description::Logs from project stories creation workflow"
-          
-          # Use actions/upload-artifact to upload logs
           echo "Artifacts ready in ./artifacts"
-
 
       - name: Upload logs
         if: always()
