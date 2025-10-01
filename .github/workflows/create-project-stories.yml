@@ -80,7 +80,7 @@ jobs:
           npm install marked graphql-request graphql >> create-project-stories.log 2>&1
           
           # Create a script to parse markdown files and create/update GitHub Project items
-          cat > create-project-items.js << 'EOF'
+          cat > create-project-items.cjs << 'EOF'
           const fs = require('fs');
           const { marked } = require('marked');
           const { GraphQLClient, gql } = require('graphql-request');
@@ -437,11 +437,11 @@ jobs:
           
           # Execute the script with required environment variables
           echo "[DEBUG] Executing Node.js script" >> create-project-stories.log
-          node create-project-items.js 2>&1 | tee -a create-project-stories.log | tee ./artifacts/run.log
+          node create-project-items.cjs 2>&1 | tee -a create-project-stories.log | tee ./artifacts/run.log
           echo "[DEBUG] Node.js script execution completed" >> create-project-stories.log
           
           # Copy script to artifacts
-          cp create-project-items.js ./artifacts/
+          cp create-project-items.cjs ./artifacts/
           echo "Logs uploaded to artifacts directory" > ./artifacts/artifact-info.txt
           echo "Changed files: $CHANGED_FILES" >> ./artifacts/artifact-info.txt
           
