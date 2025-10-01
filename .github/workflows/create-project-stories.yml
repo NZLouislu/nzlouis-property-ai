@@ -55,7 +55,7 @@ jobs:
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          PROJECT_ID: PVT_kwHOBFSaJM4BEcZZ
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
         run: |
           echo "[DEBUG] Starting project item creation process at $(date)" >> create-project-stories.log
           echo "[DEBUG] Project ID: $PROJECT_ID" >> create-project-stories.log
