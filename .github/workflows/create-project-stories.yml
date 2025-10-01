@@ -222,3 +222,13 @@ jobs:
           
           # Use actions/upload-artifact to upload logs
           npx @actions/upload-artifact@v3.0.0 --path ./artifacts --name project-stories-logs --description "Logs from project stories creation workflow"
+
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Create-GitHub-Project-Stories-${{ github.run_number }}
+          path: |
+            *.log
+          retention-days: 7  # Use actions/upload-artifact to upload artifacts
