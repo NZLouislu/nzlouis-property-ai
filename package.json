@@ -7,8 +7,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "test": "jest",
-    "update-stats": "npx tsx scripts/updateDatabaseAnalysis.local.ts"
+    "test": "jest --config jest.config.ts",
+    "update-stats": "npx tsx scripts/updateDatabaseAnalysis.local.ts",
+    "project": "npx tsx app/api/projects/md-to-project.ts",
+    "md": "npx tsx app/api/projects/project-to-md.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -16,6 +18,7 @@
     "axios": "^1.12.2",
     "dotenv": "^16.5.1",
     "framer-motion": "^12.23.19",
+    "github-projects-md-sync": "^0.1.7",
     "lucide-react": "^0.544.0",
     "next": "^15.5.4",
     "react": "19.1.0",

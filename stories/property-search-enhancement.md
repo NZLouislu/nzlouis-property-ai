@@ -6,7 +6,7 @@ nzlouis-property-ai-property-search-functiions
 
 ### Status
 
-Backlog
+To do
 
 ### Description
 

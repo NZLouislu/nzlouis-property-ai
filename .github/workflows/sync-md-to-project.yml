@@ -1,0 +1,26 @@
+name: Sync MD to Project
+on:
+  schedule:
+    - cron: '0 16 * * *'
+  workflow_dispatch: {}
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      repository-projects: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Sync markdown to project
+        env:
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: npx tsx app/api/projects/md-to-project.ts
