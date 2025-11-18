@@ -9,6 +9,7 @@ const config: JestConfigWithTsJest = {
       useESM: true,
       tsconfig: {
         module: "esnext",
+        jsx: "react",
       },
     },
   },

@@ -21,6 +21,8 @@ const Properties: React.FC = () => {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  const suburbsForQuery = selectedSuburb ? [selectedSuburb] : undefined;
+  
   const {
     data,
     isFetchingNextPage,
@@ -29,7 +31,7 @@ const Properties: React.FC = () => {
     error,
     fetchNextPage,
     hasNextPage,
-  } = usePropertiesData(selectedCity, [selectedSuburb]);
+  } = usePropertiesData(selectedCity, suburbsForQuery);
 
   // 将 data 转换为正确的类型
   const propertiesData = data as { pages: Property[][] } | undefined;

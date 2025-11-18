@@ -7,7 +7,8 @@ export async function fetchPropertiesByCity(
   suburbs: string[] | null = null
 ): Promise<Property[]> {
   try {
-    // Don't fetch if city is not provided
+    console.log("fetchPropertiesByCity called with:", { city, page, pageSize, suburbs });
+    
     if (!city) {
       return [];
     }
@@ -21,11 +22,11 @@ export async function fetchPropertiesByCity(
       params.append("suburbs", suburbs.join(","));
     }
 
-    console.log("Fetching properties for city:", city);
-
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
+    console.log("Making request to:", `/api/property?${params.toString()}`);
+    
     const response = await fetch(`/api/property?${params.toString()}`, {
       signal: controller.signal
     });
@@ -34,14 +35,16 @@ export async function fetchPropertiesByCity(
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error("Server error response:", errorData);
       throw new Error(`Failed to fetch properties: ${errorData.error}`);
     }
 
     const data = await response.json();
-    console.log("Fetched properties count:", data?.length || 0);
+    console.log("Received response with", data.length, "properties");
     return data as Property[];
   } catch (error: any) {
     if (error.name === 'AbortError') {
+      console.error("Request timeout");
       throw new Error('Request timeout - the server took too long to respond');
     }
     console.error("Error in fetchPropertiesByCity:", error);
