@@ -1,7 +1,5 @@
 name: Daily Project to MD
 on:
-  schedule:
-    - cron: '0 16 * * *'
   workflow_dispatch: {}
 jobs:
   export:

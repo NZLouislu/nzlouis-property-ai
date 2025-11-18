@@ -1,7 +1,5 @@
 name: Sync MD to Project
 on:
-  schedule:
-    - cron: '0 16 * * *'
   workflow_dispatch: {}
 jobs:
   sync:

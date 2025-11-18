@@ -12,6 +12,7 @@
 .qoder/
 .lingma/
 /tasks/
+/issues/
 
 # testing
 /coverage

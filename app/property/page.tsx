@@ -9,12 +9,14 @@ import LocationSelector from "@/src/components/LocationSelector";
 
 export default function PropertyPage() {
   const lastPropertyElementRef = useRef<HTMLDivElement>(null);
-  const [selectedRegion, setSelectedRegion] = useState("Wellington");
   const [selectedCity, setSelectedCity] = useState("Wellington City");
   const [selectedSuburb, setSelectedSuburb] = useState<string>("all-suburbs");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
+  const suburbsForQuery = selectedSuburb === "all-suburbs" ? undefined : [selectedSuburb];
+  
+  console.log("PropertyPage rendering with:", { selectedCity, selectedSuburb, suburbsForQuery });
+  
   const {
     data,
     isFetchingNextPage,
@@ -23,26 +25,55 @@ export default function PropertyPage() {
     error,
     fetchNextPage,
     hasNextPage,
-  } = usePropertiesData(selectedCity, selectedSuburb === "all-suburbs" ? [] : [selectedSuburb]);
+  } = usePropertiesData(selectedCity, suburbsForQuery);
 
   const propertiesData = data as { pages: Property[][] } | undefined;
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 1.0 }
-    );
-    const currentElement = lastPropertyElementRef.current;
-    if (currentElement) {
-      observer.observe(currentElement);
+    const savedPosition = sessionStorage.getItem('propertyScrollPosition');
+    if (savedPosition) {
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(savedPosition));
+      }, 100);
     }
 
-    return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+    const handleBeforeUnload = () => {
+      sessionStorage.setItem('propertyScrollPosition', window.scrollY.toString());
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  useEffect(() => {
+    console.log("IntersectionObserver effect triggered", { hasNextPage, isFetchingNextPage });
+    
+    const currentElement = lastPropertyElementRef.current;
+    if (!currentElement) {
+      console.log("No element to observe");
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      console.log("IntersectionObserver callback", { 
+        isIntersecting: entries[0].isIntersecting, 
+        hasNextPage, 
+        isFetchingNextPage 
+      });
+      
+      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+        console.log("Fetching next page...");
+        fetchNextPage();
+      }
+    }, { threshold: 1.0 });
+
+    observer.observe(currentElement);
+
+    return () => {
+      console.log("Disconnecting observer");
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, propertiesData]);
 
   const properties: Property[] = propertiesData
     ? propertiesData.pages.flatMap((page) => page)
@@ -53,7 +84,10 @@ export default function PropertyPage() {
     city: string; 
     suburb: string 
   }) => {
-    setSelectedRegion(selection.region);
+    console.log("Location changed:", selection);
+    if (selection.city !== selectedCity || selection.suburb !== selectedSuburb) {
+      sessionStorage.removeItem('propertyScrollPosition');
+    }
     setSelectedCity(selection.city);
     setSelectedSuburb(selection.suburb);
   };
@@ -84,7 +118,7 @@ export default function PropertyPage() {
           textShadow: "0 2px 4px rgba(0,0,0,0.1)",
         }}
       >
-        All Properties
+        Properties
       </h1>
 
       <div
