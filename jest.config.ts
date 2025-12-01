@@ -4,6 +4,7 @@ const config: JestConfigWithTsJest = {
   testEnvironment: "node",
   preset: "ts-jest/presets/default-esm",
   extensionsToTreatAsEsm: [".ts"],
+  verbose: false,
   globals: {
     "ts-jest": {
       useESM: true,

@@ -613,9 +613,19 @@ const PropertyList: React.FC<{
         <h3 style={{ fontSize: "1.5rem", marginBottom: "12px" }}>
           Error loading properties
         </h3>
-        <p style={{ fontSize: "1rem" }}>
+        <p style={{ fontSize: "1rem", whiteSpace: "pre-line" }}>
           {error?.message || "Failed to load properties"}
         </p>
+        {error?.message?.includes("timeout") && (
+          <p style={{ 
+            fontSize: "0.9rem", 
+            marginTop: "16px", 
+            color: "#718096",
+            fontStyle: "italic"
+          }}>
+            This may be due to a temporary server issue or database timeout. Please try again later.
+          </p>
+        )}
       </div>
     );
   }

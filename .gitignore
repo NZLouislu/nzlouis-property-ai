@@ -13,6 +13,7 @@
 .lingma/
 /tasks/
 /issues/
+.agent/
 
 # testing
 /coverage

@@ -605,7 +605,7 @@ const Properties: React.FC = () => {
                             fontSize: "1rem",
                           }}
                         >
-                          Predicted: {formatCurrency(property.predicted_price)}
+                          Predicted: {formatCurrency(property.predicted_price || 0)}
                         </span>
                       </div>
                     </div>

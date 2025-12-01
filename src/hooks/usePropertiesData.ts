@@ -17,20 +17,15 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
   const queryKey = useMemo(() => {
     const normalizedCity = city || "";
     const suburbKey = normalizedSuburbs ? normalizedSuburbs.join(',') : 'all';
-    return ["properties", normalizedCity, suburbKey, "fixed-v1"];
+    return ["properties", normalizedCity, suburbKey, "fixed-v3"];
   }, [city, normalizedSuburbs]);
-  
-  console.log("usePropertiesData called with:", { city, suburbs, normalizedSuburbs, queryKey });
   
   const queryInfo = useInfiniteQuery<Property[], Error>({
     queryKey,
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0, signal }) => {
       try {
-        console.log("queryFn called with:", { pageParam, city, normalizedSuburbs });
-        
         if (!city) {
-          console.log("No city provided, returning empty array");
           return [];
         }
         
@@ -41,12 +36,6 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
           normalizedSuburbs
         );
         
-        console.log("fetchPropertiesByCity result:", { 
-          pageParam, 
-          resultLength: result.length,
-          shouldHaveNextPage: result.length === pageSize
-        });
-        
         return result;
       } catch (error: any) {
         console.error("Error fetching properties:", error);
@@ -54,25 +43,20 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
       }
     },
     getNextPageParam: (lastPage, allPages) => {
-      console.log("getNextPageParam called with:", { 
-        lastPageLength: lastPage?.length, 
-        allPagesLength: allPages.length,
-        pageSize
-      });
-      
-      // 关键修复：只要最后一页的数据量等于pageSize，就认为还有下一页
+      // If the last page has pageSize items, assume there is a next page
       if (lastPage && lastPage.length === pageSize) {
-        console.log("Has next page, returning:", allPages.length);
         return allPages.length;
       }
       
-      console.log("No next page");
       return undefined;
     },
     retry: (failureCount, error) => {
-      console.log("Retry logic:", { failureCount, errorMessage: error.message });
+      // Reduce retry attempts for database timeout errors
+      if (error.message.includes('statement timeout') || error.message.includes('canceling statement')) {
+        return failureCount < 1; // Retry only once
+      }
       if (error.message.includes('timeout') || error.message.includes('network')) {
-        return failureCount < 3;
+        return failureCount < 2;
       }
       return failureCount < 1;
     },
@@ -80,15 +64,6 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!city,
     refetchOnWindowFocus: false,
-  });
-  
-  // 添加额外的日志来追踪查询状态
-  console.log("Query info:", {
-    isLoading: queryInfo.isLoading,
-    isFetching: queryInfo.isFetching,
-    isFetchingNextPage: queryInfo.isFetchingNextPage,
-    hasNextPage: queryInfo.hasNextPage,
-    dataPagesCount: queryInfo.data?.pages.length
   });
   
   return queryInfo;
