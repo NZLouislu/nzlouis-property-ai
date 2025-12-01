@@ -34,6 +34,7 @@ const createMockProperties = (count: number, suburb: string): Property[] => {
     category: 'House',
     property_url: `https://example.com/property/${i}`,
     cover_image_url: `https://example.com/images/${i}.jpg`,
+    region: 'Wellington', // Added missing region field
   }));
 };
 
@@ -82,9 +83,7 @@ describe('Property Pagination Issue', () => {
     expect(result.current.hasNextPage).toBe(true);
 
     result.current.fetchNextPage();
-    await waitFor(() => expect(result.current.isFetchingNextPage).toBe(false));
-    
-    expect(result.current.data?.pages).toHaveLength(2);
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
     expect(result.current.hasNextPage).toBe(true);
 
     rerender({ suburbs: ['Brooklyn'] });
@@ -100,9 +99,7 @@ describe('Property Pagination Issue', () => {
     expect(result.current.hasNextPage).toBe(true);
 
     result.current.fetchNextPage();
-    await waitFor(() => expect(result.current.isFetchingNextPage).toBe(false));
-    
-    expect(result.current.data?.pages).toHaveLength(2);
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
     expect(result.current.hasNextPage).toBe(true);
   });
 
@@ -124,9 +121,7 @@ describe('Property Pagination Issue', () => {
     expect(result.current.hasNextPage).toBe(true);
 
     result.current.fetchNextPage();
-    await waitFor(() => expect(result.current.isFetchingNextPage).toBe(false));
-    
-    expect(result.current.data?.pages).toHaveLength(2);
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
     expect(result.current.hasNextPage).toBe(false);
   });
 
@@ -151,10 +146,8 @@ describe('Property Pagination Issue', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     
     result.current.fetchNextPage();
-    await waitFor(() => expect(result.current.isFetchingNextPage).toBe(false));
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
     
-    expect(result.current.data?.pages).toHaveLength(2);
-
     rerender({ suburbs: ['Brooklyn'] });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     

@@ -21,9 +21,14 @@ export async function GET(request: Request) {
   }
 
   try {
+    // 检查 properties 表是否存在
+    const { error: tableCheckError } = await supabase.from('properties').select('id').limit(1);
+    const tableName = tableCheckError ? 'properties_view' : 'properties';
+    console.log(`Using table: ${tableName}`);
+
     // Build base query
     let query = supabase
-      .from("properties_view")
+      .from(tableName)
       .select(`
         id,
         property_url,
@@ -31,26 +36,14 @@ export async function GET(request: Request) {
         address,
         suburb,
         city,
-        postcode,
-        year_built,
         bedrooms,
         bathrooms,
         car_spaces,
-        floor_size,
         land_area,
         last_sold_date,
-        capital_value,
-        land_value,
-        improvement_value,
-        has_rental_history,
-        is_currently_rented,
-        status,
-        property_history,
-        normalized_address,
-        created_at,
         region,
         cover_image_url
-      `, { count: 'exact' }) // 添加 count: 'exact' 来获取准确的总数
+      `) // 只选择前端列表页需要的字段，移除不必要的字段以优化性能
       .eq("city", city)
       .order("id");
 
@@ -68,12 +61,25 @@ export async function GET(request: Request) {
     console.log("Pagination range:", { start, end });
     query = query.range(start, end);
 
-    // Execute query with timeout
-    const { data, error, count } = await query;
-    console.log("Query result:", { dataLength: data?.length, error, count });
+    // Execute query
+    const { data, error } = await query;
+    console.log("Query result:", { dataLength: data?.length, error });
 
     if (error) {
       console.error("Supabase query error:", error);
+      
+      // 特殊处理数据库超时错误
+      if (error.code === '57014' || error.message.includes('statement timeout')) {
+        return NextResponse.json(
+          { 
+            error: `Database query timeout. The dataset for "${city}" is very large. Please try:\n1. Select specific suburbs to narrow down the search\n2. The system will load a maximum of 2 pages (18 properties) to prevent timeouts`,
+            code: 'TIMEOUT',
+            suggestion: 'Use suburb filters to reduce data size'
+          },
+          { status: 500 }
+        );
+      }
+      
       return NextResponse.json(
         { error: `Failed to fetch properties: ${error.message}` },
         { status: 500 }
