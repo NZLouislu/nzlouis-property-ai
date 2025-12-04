@@ -143,6 +143,7 @@ export default function PropertyPage() {
         
         <AddressAutocomplete
           value={inputValue}
+          city={selectedCity}
           onChange={(val) => {
             setInputValue(val);
             if (val === "") {
@@ -160,7 +161,7 @@ export default function PropertyPage() {
             setSearchQuery("");
             setIsExactSearch(false);
           }}
-          placeholder="Search by address across all cities (e.g., 24 Main Street)..."
+          placeholder={`Search by address in ${selectedCity} (e.g., 24 Main Street)...`}
         />
       </div>
 

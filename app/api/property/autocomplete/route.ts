@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const query = searchParams.get('q');
   const city = searchParams.get('city');
 
+  // Require at least 2 characters (database indexes will handle performance)
   if (!query || query.length < 2) {
     return NextResponse.json([]);
   }
@@ -21,9 +22,14 @@ export async function GET(request: NextRequest) {
 
     let queryBuilder = supabase
       .from(tableName)
-      .select('id, address, suburb, city')
-      // Use starts-with instead of contains for better performance
-      .ilike('address', `${query}%`);
+      .select('id, address, suburb, city');
+    
+    // Use starts-with for short queries (better performance), contains for longer queries
+    if (query.length <= 2) {
+      queryBuilder = queryBuilder.ilike('address', `${query}%`);
+    } else {
+      queryBuilder = queryBuilder.ilike('address', `%${query}%`);
+    }
 
     if (city && city !== 'all-cities') {
       queryBuilder = queryBuilder.eq('city', city);
