@@ -4,7 +4,7 @@ import { Property } from "../components/properties.type";
 import { Region } from "../components/properties.type";
 import { useState, useEffect, useMemo } from "react";
 
-export function usePropertiesData(city: string, suburbs?: string[]) {
+export function usePropertiesData(city: string, suburbs?: string[], searchQuery?: string, isExactSearch?: boolean, propertyId?: string) {
   const pageSize = 9;
   
   const normalizedSuburbs = useMemo(() => {
@@ -17,15 +17,15 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
   const queryKey = useMemo(() => {
     const normalizedCity = city || "";
     const suburbKey = normalizedSuburbs ? normalizedSuburbs.join(',') : 'all';
-    return ["properties", normalizedCity, suburbKey, "fixed-v3"];
-  }, [city, normalizedSuburbs]);
+    return ["properties", normalizedCity, suburbKey, searchQuery || "", isExactSearch ? "exact" : "partial", propertyId || "", "fixed-v3"];
+  }, [city, normalizedSuburbs, searchQuery, isExactSearch, propertyId]);
   
   const queryInfo = useInfiniteQuery<Property[], Error>({
     queryKey,
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0, signal }) => {
       try {
-        if (!city) {
+        if (!city && !propertyId) {
           return [];
         }
         
@@ -33,7 +33,10 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
           city,
           pageParam as number,
           pageSize,
-          normalizedSuburbs
+          normalizedSuburbs,
+          searchQuery,
+          isExactSearch,
+          propertyId
         );
         
         return result;
@@ -43,6 +46,11 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
       }
     },
     getNextPageParam: (lastPage, allPages) => {
+      // If searching by ID, don't paginate
+      if (propertyId) {
+        return undefined;
+      }
+      
       // If the last page has pageSize items, assume there is a next page
       if (lastPage && lastPage.length === pageSize) {
         return allPages.length;
@@ -62,7 +70,7 @@ export function usePropertiesData(city: string, suburbs?: string[]) {
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: !!city,
+    enabled: !!city || !!propertyId,
     refetchOnWindowFocus: false,
   });
   

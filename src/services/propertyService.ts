@@ -4,22 +4,37 @@ export async function fetchPropertiesByCity(
   city: string,
   page: number = 0,
   pageSize: number = 9,
-  suburbs: string[] | null = null
+  suburbs: string[] | null = null,
+  searchQuery?: string,
+  isExactSearch?: boolean,
+  propertyId?: string
 ): Promise<Property[]> {
   try {
-    console.log("fetchPropertiesByCity called with:", { city, page, pageSize, suburbs });
+    console.log("fetchPropertiesByCity called with:", { city, page, pageSize, suburbs, searchQuery, isExactSearch, propertyId });
     
-    if (!city) {
+    if (!city && !propertyId) {
       return [];
     }
 
     const params = new URLSearchParams();
-    params.append("city", city);
-    params.append("page", page.toString());
-    params.append("pageSize", pageSize.toString());
+    
+    if (propertyId) {
+      params.append("id", propertyId);
+    } else {
+      params.append("city", city);
+      params.append("page", page.toString());
+      params.append("pageSize", pageSize.toString());
 
-    if (suburbs && suburbs.length > 0) {
-      params.append("suburbs", suburbs.join(","));
+      if (suburbs && suburbs.length > 0) {
+        params.append("suburbs", suburbs.join(","));
+      }
+
+      if (searchQuery) {
+        params.append("search", searchQuery);
+        if (isExactSearch) {
+          params.append("exact", "true");
+        }
+      }
     }
 
     const controller = new AbortController();

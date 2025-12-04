@@ -12,16 +12,19 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get("page") || "0");
   const pageSize = Math.min(parseInt(searchParams.get("pageSize") || "9"), 50);
   const suburbs = searchParams.get("suburbs")?.split(",") || [];
+  const search = searchParams.get("search");
+  const exact = searchParams.get("exact") === "true";
+  const propertyId = searchParams.get("id");
 
-  console.log("API route called with:", { city, page, pageSize, suburbs });
+  console.log("API route called with:", { city, page, pageSize, suburbs, search, exact, propertyId });
 
-  if (!city) {
-    console.log("No city provided, returning empty array");
+  // If searching by ID, we don't need city
+  if (!propertyId && !exact && !city) {
+    console.log("No city/ID provided and not exact search, returning empty array");
     return NextResponse.json([]);
   }
 
   try {
-    // 检查 properties 表是否存在
     const { error: tableCheckError } = await supabase.from('properties').select('id').limit(1);
     const tableName = tableCheckError ? 'properties_view' : 'properties';
     console.log(`Using table: ${tableName}`);
@@ -43,32 +46,65 @@ export async function GET(request: Request) {
         last_sold_date,
         region,
         cover_image_url
-      `) // 只选择前端列表页需要的字段，移除不必要的字段以优化性能
-      .eq("city", city)
-      .order("id");
+      `);
 
-    // Apply suburb filter if provided
-    const filteredSuburbs = suburbs.filter((suburb) => suburb.trim() !== "");
-    console.log("Filtered suburbs:", filteredSuburbs);
-    
-    if (filteredSuburbs.length > 0) {
-      query = query.in("suburb", filteredSuburbs);
+    // Priority 1: Search by ID (fastest and most reliable)
+    if (propertyId) {
+      console.log("🔍 Searching by property ID:", propertyId, "type:", typeof propertyId);
+      // ID might be string (UUID) or number - don't use parseInt
+      query = query.eq("id", propertyId);
+    } else {
+      // Priority 2: Apply city filter only if NOT doing exact address search
+      if (!exact && city) {
+        query = query.eq("city", city);
+      }
+
+      // Apply suburb filter if provided (and not doing exact search)
+      if (!exact) {
+        const filteredSuburbs = suburbs.filter((suburb) => suburb.trim() !== "");
+        console.log("Filtered suburbs:", filteredSuburbs);
+        
+        if (filteredSuburbs.length > 0) {
+          query = query.in("suburb", filteredSuburbs);
+        }
+      }
+
+      // Apply search filter if provided
+      if (search) {
+        if (exact) {
+          // For exact search, use the street address (part before first comma)
+          const streetAddress = search.split(',')[0].trim();
+          console.log("Using prefix match for exact search with:", streetAddress);
+          query = query.ilike('address', `${streetAddress}%`).limit(1);
+        } else {
+          // Optimize: If search starts with a number, use prefix match
+          if (/^\d/.test(search)) {
+            query = query.ilike('address', `${search}%`);
+          } else {
+            query = query.ilike('address', `%${search}%`);
+          }
+        }
+      }
+
+      // Order by ID only if not doing exact search or ID search
+      if (!exact && !propertyId) {
+        query = query.order("id");
+      }
+
+      // Apply pagination using range
+      const start = page * pageSize;
+      const end = start + pageSize - 1;
+      console.log("Pagination range:", { start, end });
+      query = query.range(start, end);
     }
-
-    // Apply pagination using range
-    const start = page * pageSize;
-    const end = start + pageSize - 1;
-    console.log("Pagination range:", { start, end });
-    query = query.range(start, end);
 
     // Execute query
     const { data, error } = await query;
-    console.log("Query result:", { dataLength: data?.length, error });
+    console.log("Query result:", { dataLength: data?.length, error, firstResult: data?.[0] });
 
     if (error) {
       console.error("Supabase query error:", error);
       
-      // 特殊处理数据库超时错误
       if (error.code === '57014' || error.message.includes('statement timeout')) {
         return NextResponse.json(
           { 

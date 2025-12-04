@@ -4,15 +4,23 @@ import { useState, useEffect, useRef, RefObject } from "react";
 import { useForecastData } from "@/src/hooks/useForecastData";
 import { Property } from "@/src/components/properties.type";
 import PropertyList from "@/src/components/Properties/PropertyList";
-import { FaSearch } from "react-icons/fa";
 import LocationSelector from "@/src/components/LocationSelector";
+import AddressAutocomplete from "@/src/components/AddressAutocomplete";
 
 export default function ForecastPage() {
   const lastPropertyElementRef = useRef<HTMLDivElement>(null);
   const [selectedRegion, setSelectedRegion] = useState("Wellington");
   const [selectedCity, setSelectedCity] = useState("Wellington City");
   const [selectedSuburb, setSelectedSuburb] = useState<string>("all-suburbs");
+  
+  // inputValue controls the input field and autocomplete
+  const [inputValue, setInputValue] = useState<string>("");
+  
+  // searchQuery controls the actual property list fetching (not implemented in useForecastData yet, but good for future)
+  // For now, forecast page still uses client-side filtering for simplicity, or we can update it later.
+  // But to fix the "input triggers reload" issue, we should separate them.
   const [searchQuery, setSearchQuery] = useState<string>("");
+  
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   const {
@@ -58,6 +66,8 @@ export default function ForecastPage() {
     setSelectedSuburb(selection.suburb);
   };
 
+  // Client-side filtering for forecast page (as it was before)
+  // But now it filters based on searchQuery (set on select/enter) instead of inputValue
   const filteredProperties: Property[] = properties.filter((property) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -112,34 +122,21 @@ export default function ForecastPage() {
           </div>
         </div>
         
-        <div style={{ position: "relative", width: "100%" }}>
-          <FaSearch
-            style={{
-              position: "absolute",
-              left: "14px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#718096",
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Search properties..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              padding: "14px 18px 14px 40px",
-              borderRadius: "10px",
-              border: "2px solid #e2e8f0",
-              fontSize: "16px",
-              width: "100%",
-              backgroundColor: "#fff",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-              transition: "all 0.2s",
-              boxSizing: "border-box",
-            }}
-          />
-        </div>
+        <AddressAutocomplete
+          value={inputValue}
+          onChange={(val) => {
+            setInputValue(val);
+            if (val === "") {
+              setSearchQuery("");
+            }
+          }}
+          onSelect={(suggestion) => {
+            setInputValue(suggestion.address);
+            setSearchQuery(suggestion.address);
+          }}
+          placeholder="Search forecast properties by address (e.g., 24 Main Street)..."
+          apiEndpoint="/api/forecast/autocomplete"
+        />
       </div>
 
       <PropertyList
