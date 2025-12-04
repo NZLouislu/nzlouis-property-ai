@@ -23,11 +23,15 @@ export async function GET(request: NextRequest) {
       .from(tableName)
       .select('id, address, suburb, city')
       // Use starts-with instead of contains for better performance
-      .ilike('address', `${query}%`)
-      .order('city')
-      .limit(10);
+      .ilike('address', `${query}%`);
 
-    const { data, error } = await queryBuilder;
+    if (city && city !== 'all-cities') {
+      queryBuilder = queryBuilder.eq('city', city);
+    }
+
+    const { data, error } = await queryBuilder
+      .order('address')
+      .limit(20);
 
     if (error) {
       console.error('Autocomplete error:', error);

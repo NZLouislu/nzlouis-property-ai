@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
       .from('properties_with_latest_status')
       .select('id, address, suburb, city')
       .ilike('address', `%${query}%`)
-      .order('city')
-      .limit(10);
+      .order('address')
+      .limit(20);
 
     const { data, error } = await queryBuilder;
 
@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
         .from(fallbackTableName)
         .select('id, address, suburb, city')
         .ilike('address', `%${query}%`)
-        .order('city')
-        .limit(10);
+        .order('address')
+        .limit(20);
 
       const { data: fallbackData, error: fallbackError } = await fallbackQuery;
 
