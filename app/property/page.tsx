@@ -4,18 +4,22 @@ import { useState, useEffect, useRef, RefObject } from "react";
 import { usePropertiesData } from "@/src/hooks/usePropertiesData";
 import { Property } from "@/src/components/properties.type";
 import PropertyList from "@/src/components/Properties/PropertyList";
-import { FaSearch } from "react-icons/fa";
 import LocationSelector from "@/src/components/LocationSelector";
+import AddressAutocomplete from "@/src/components/AddressAutocomplete";
 
 export default function PropertyPage() {
   const lastPropertyElementRef = useRef<HTMLDivElement>(null);
   const [selectedCity, setSelectedCity] = useState("Wellington City");
   const [selectedSuburb, setSelectedSuburb] = useState<string>("all-suburbs");
+  
+  const [inputValue, setInputValue] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isExactSearch, setIsExactSearch] = useState(false);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | undefined>();
 
   const suburbsForQuery = selectedSuburb === "all-suburbs" ? undefined : [selectedSuburb];
   
-  console.log("PropertyPage rendering with:", { selectedCity, selectedSuburb, suburbsForQuery });
+  console.log("PropertyPage rendering with:", { selectedCity, selectedSuburb, suburbsForQuery, searchQuery, isExactSearch, selectedPropertyId });
   
   const {
     data,
@@ -25,7 +29,7 @@ export default function PropertyPage() {
     error,
     fetchNextPage,
     hasNextPage,
-  } = usePropertiesData(selectedCity, suburbsForQuery);
+  } = usePropertiesData(selectedCity, suburbsForQuery, searchQuery, isExactSearch, selectedPropertyId);
 
   const propertiesData = data as { pages: Property[][] } | undefined;
 
@@ -92,16 +96,7 @@ export default function PropertyPage() {
     setSelectedSuburb(selection.suburb);
   };
 
-  const filteredProperties: Property[] = properties.filter((property) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      property.address.toLowerCase().includes(query) ||
-      property.suburb.toLowerCase().includes(query) ||
-      property.city.toLowerCase().includes(query) ||
-      (property.category && property.category.toLowerCase().includes(query))
-    );
-  });
+  const filteredProperties = properties;
 
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px" }}>
@@ -146,34 +141,27 @@ export default function PropertyPage() {
           </div>
         </div>
         
-        <div style={{ position: "relative", width: "100%" }}>
-          <FaSearch
-            style={{
-              position: "absolute",
-              left: "14px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#718096",
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Search properties..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              padding: "14px 18px 14px 40px",
-              borderRadius: "10px",
-              border: "2px solid #e2e8f0",
-              fontSize: "16px",
-              width: "100%",
-              backgroundColor: "#fff",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-              transition: "all 0.2s",
-              boxSizing: "border-box",
-            }}
-          />
-        </div>
+        <AddressAutocomplete
+          value={inputValue}
+          onChange={(val) => {
+            setInputValue(val);
+            if (val === "") {
+              setSearchQuery("");
+              setIsExactSearch(false);
+              setSelectedPropertyId(undefined);
+            }
+          }}
+          onSelect={(suggestion) => {
+            console.log("🎯 Selected suggestion:", suggestion);
+            console.log("🆔 Setting property ID to:", suggestion.id, "type:", typeof suggestion.id);
+            setInputValue(suggestion.address);
+            // Use property ID for the most reliable search (ID is already a string)
+            setSelectedPropertyId(suggestion.id);
+            setSearchQuery("");
+            setIsExactSearch(false);
+          }}
+          placeholder="Search by address across all cities (e.g., 24 Main Street)..."
+        />
       </div>
 
       {isError && (
