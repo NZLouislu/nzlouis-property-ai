@@ -1,4 +1,5 @@
 import { Property } from "../components/properties.type";
+import { API_ENDPOINTS, API_CONFIG } from "../config/api";
 
 export async function fetchPropertiesByCity(
   city: string,
@@ -38,20 +39,32 @@ export async function fetchPropertiesByCity(
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
 
-    console.log("Making request to:", `/api/property?${params.toString()}`);
+    const apiUrl = `${API_ENDPOINTS.property}?${params.toString()}`;
+    console.log("Making request to:", apiUrl);
     
-    const response = await fetch(`/api/property?${params.toString()}`, {
+    const response = await fetch(apiUrl, {
       signal: controller.signal
     });
 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Server error response:", errorData);
-      throw new Error(`Failed to fetch properties: ${errorData.error}`);
+      // Try to parse JSON error, but handle non-JSON responses
+      let errorMessage = `Server error (${response.status})`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.detail || JSON.stringify(errorData);
+      } catch (jsonError) {
+        // Response is not JSON, get text instead
+        const errorText = await response.text();
+        errorMessage = errorText || `HTTP ${response.status} ${response.statusText}`;
+        console.error("Non-JSON error response:", errorText);
+      }
+      
+      console.error("Server error response:", errorMessage);
+      throw new Error(`Failed to fetch properties: ${errorMessage}`);
     }
 
     const data = await response.json();
