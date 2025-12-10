@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaSearch } from 'react-icons/fa';
+import { API_ENDPOINTS } from '../config/api';
 
 interface AddressSuggestion {
   id: string;
@@ -23,7 +24,7 @@ export default function AddressAutocomplete({
   onSelect,
   city,
   placeholder = 'Search by address...',
-  apiEndpoint = '/api/property/autocomplete'
+  apiEndpoint = API_ENDPOINTS.propertyAutocomplete
 }: AddressAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);

@@ -1,4 +1,5 @@
 import { Property } from "../components/properties.type";
+import { API_ENDPOINTS } from "../config/api";
 
 export async function fetchForecastPropertiesByCity(
   city: string,
@@ -18,13 +19,25 @@ export async function fetchForecastPropertiesByCity(
 
     console.log("Fetching forecast properties for city:", city);
 
-    const response = await fetch(`/api/forecast?${params.toString()}`);
+    const apiUrl = `${API_ENDPOINTS.forecast}?${params.toString()}`;
+    console.log("Making request to:", apiUrl);
+    
+    const response = await fetch(apiUrl);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `Failed to fetch forecast properties: ${errorData.error}`
-      );
+      // Try to parse JSON error, but handle non-JSON responses
+      let errorMessage = `Server error (${response.status})`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.detail || JSON.stringify(errorData);
+      } catch (jsonError) {
+        // Response is not JSON, get text instead
+        const errorText = await response.text();
+        errorMessage = errorText || `HTTP ${response.status} ${response.statusText}`;
+        console.error("Non-JSON error response:", errorText);
+      }
+      
+      throw new Error(`Failed to fetch forecast properties: ${errorMessage}`);
     }
 
     const data = await response.json();
