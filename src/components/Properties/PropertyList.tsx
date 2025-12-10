@@ -16,6 +16,8 @@ const PropertyCard: React.FC<{
   onFavoriteToggle?: (id: string) => void;
   isFavorite?: boolean;
 }> = ({ property, onFavoriteToggle, isFavorite }) => {
+  const [imageError, setImageError] = React.useState(false);
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-NZ", {
       style: "currency",
@@ -49,7 +51,7 @@ const PropertyCard: React.FC<{
       }}
     >
       <div style={{ position: "relative" }}>
-        <a
+      <a
           href={property.property_url}
           target="_blank"
           rel="noopener noreferrer"
@@ -60,10 +62,11 @@ const PropertyCard: React.FC<{
             color: "inherit",
           }}
         >
-          {property.cover_image_url ? (
+          {property.cover_image_url && !imageError ? (
             <img
               src={property.cover_image_url}
               alt={property.address}
+              onError={() => setImageError(true)}
               style={{
                 width: "100%",
                 height: "220px",
