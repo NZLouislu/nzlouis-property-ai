@@ -53,12 +53,16 @@ export async function fetchPropertiesByCity(
     if (!response.ok) {
       // Try to parse JSON error, but handle non-JSON responses
       let errorMessage = `Server error (${response.status})`;
+      const errorText = await response.text();
       try {
-        const errorData = await response.json();
-        errorMessage = errorData.error || errorData.detail || JSON.stringify(errorData);
+        const errorData = JSON.parse(errorText);
+        if (typeof errorData === 'object' && errorData !== null) {
+          errorMessage = errorData.error || errorData.detail || errorData.message || JSON.stringify(errorData);
+        } else {
+          errorMessage = String(errorData);
+        }
       } catch (jsonError) {
-        // Response is not JSON, get text instead
-        const errorText = await response.text();
+        // Response is not JSON, use text instead
         errorMessage = errorText || `HTTP ${response.status} ${response.statusText}`;
         console.error("Non-JSON error response:", errorText);
       }

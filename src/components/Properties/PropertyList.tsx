@@ -671,7 +671,7 @@ const PropertyList: React.FC<{
               ? lastPropertyElementRef
               : undefined;
           return (
-            <div key={p.id} ref={ref}>
+            <div key={`${p.id}-${index}`} ref={ref}>
               <PropertyCard
                 property={p}
                 onFavoriteToggle={onFavoriteToggle}
