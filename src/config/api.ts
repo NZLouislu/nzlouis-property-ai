@@ -1,10 +1,14 @@
 /**
  * API Configuration
- * Configure API base URL to support both HF FastAPI and local Next.js API
+ * FORCED MODE: Using Hugging Face FastAPI as the primary backend.
+ * This aligns with the "Separation of Concerns" architecture.
  */
 
-// Get HF API URL from environment variable, use empty string (local API) if not set
-export const API_BASE_URL = process.env.NEXT_PUBLIC_HF_API_URL || '';
+// Default to the production HF Space URL if env var is not set
+const DEFAULT_HF_URL = 'https://nzlouislu-nzlouis-property-api.hf.space';
+
+// Export the Base URL - ensuring it's never empty
+export const API_BASE_URL = process.env.NEXT_PUBLIC_HF_API_URL || DEFAULT_HF_URL;
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -18,16 +22,19 @@ export const API_ENDPOINTS = {
 
 // Get complete API URL
 export function getApiUrl(endpoint: string): string {
-  return API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint;
+  // Since we are enforcing HF API, we can simply join them if needed, 
+  // but API_ENDPOINTS should be preferred.
+  if (endpoint.startsWith('http')) return endpoint;
+  return `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 }
 
-// Check if using HF API
+// Check if using HF API - Always true now
 export function isUsingHfApi(): boolean {
-  return Boolean(API_BASE_URL);
+  return true;
 }
 
 // API configuration
 export const API_CONFIG = {
-  timeout: 15000, // 15 seconds timeout
-  retries: 2, // Number of retries
+  timeout: 30000, // Increased timeout to 30s for AI/Data operations
+  retries: 2, 
 } as const;
