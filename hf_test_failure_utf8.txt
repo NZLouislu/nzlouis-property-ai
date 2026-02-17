@@ -1,0 +1,288 @@
+﻿node.exe : ts-jest[ts-jest-transformer] (WARN) Define `ts-jest` config under `glob
+als` is deprecated. Please do
+At line:1 char:1
++ & "C:\nvm\nodejs/node.exe" "C:\nvm\nodejs/node_modules/npm/bin/npx-cl ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ts-jest[ts-jest...ated. Please do:St 
+   ring) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+transform: {
+    <transform_regex>: ['ts-jest', { /* ts-jest config goes here in Jest */ }],
+},
+See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/presets#adva
+nced
+FAIL src/__tests__/hfApiIntegration.test.ts
+  ΓùÅ Console
+
+    console.log
+      fetchPropertiesByCity called with: {
+        city: 'Auckland',
+        page: 0,
+        pageSize: 9,
+        suburbs: null,
+        searchQuery: undefined,
+        isExactSearch: undefined,
+        propertyId: undefined
+      }
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:14:13)
+
+    console.log
+      Making request to: /api/property?city=Auckland&page=0&pageSize=9
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:45:13)
+
+    console.log
+      Received response with 1 properties
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:75:13)
+
+    console.log
+      fetchPropertiesByCity called with: {
+        city: 'Auckland',
+        page: 2,
+        pageSize: 10,
+        suburbs: [ 'Auckland Central', 'Parnell' ],
+        searchQuery: 'Queen St',
+        isExactSearch: false,
+        propertyId: undefined
+      }
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:14:13)
+
+    console.log
+      Making request to: /api/property?city=Auckland&page=2&pageSize=10&suburbs=Au
+ckland+Central%2CParnell&search=Queen+St
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:45:13)
+
+    console.log
+      Received response with 0 properties
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:75:13)
+
+    console.log
+      fetchPropertiesByCity called with: {
+        city: 'Auckland',
+        page: 0,
+        pageSize: 9,
+        suburbs: null,
+        searchQuery: undefined,
+        isExactSearch: undefined,
+        propertyId: 'test-id-123'
+      }
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:14:13)
+
+    console.log
+      Making request to: /api/property?id=test-id-123
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:45:13)
+
+    console.log
+      Received response with 1 properties
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:75:13)
+
+    console.log
+      fetchPropertiesByCity called with: {
+        city: 'Auckland',
+        page: 0,
+        pageSize: 9,
+        suburbs: null,
+        searchQuery: undefined,
+        isExactSearch: undefined,
+        propertyId: undefined
+      }
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:14:13)
+
+    console.log
+      Making request to: /api/property?city=Auckland&page=0&pageSize=9
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:45:13)
+
+    console.error
+      Error in fetchPropertiesByCity: TypeError: response.text is not a function
+          at fetchPropertiesByCity (C:\Projects\HouseWorkspace\nzlouis-property-ai
+\src\services\propertyService.ts:56:40)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at async Object.<anonymous> (C:\Projects\HouseWorkspace\nzlouis-property
+-ai\src\__tests__\hfApiIntegration.test.ts:123:7)
+
+    [0m [90m 80 |[39m       [36mthrow[39m [36mnew[39m [33mError[39m([32m
+'Request timeout - the server took too long to respond'[39m)[33m;[39m
+     [90m 81 |[39m     }
+    [31m[1m>[22m[39m[90m 82 |[39m     console[33m.[39merror([32m"Error in
+ fetchPropertiesByCity:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 83 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 84 |[39m   }
+     [90m 85 |[39m }[0m
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:82:13)
+      at async Object.<anonymous> (src/__tests__/hfApiIntegration.test.ts:123:7)
+
+    console.log
+      fetchPropertiesByCity called with: {
+        city: '',
+        page: 0,
+        pageSize: 9,
+        suburbs: null,
+        searchQuery: undefined,
+        isExactSearch: undefined,
+        propertyId: undefined
+      }
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:14:13)
+
+    console.log
+      fetchPropertiesByCity called with: {
+        city: 'Auckland',
+        page: 0,
+        pageSize: 9,
+        suburbs: null,
+        searchQuery: '123 Queen St',
+        isExactSearch: true,
+        propertyId: undefined
+      }
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:14:13)
+
+    console.log
+      Making request to: /api/property?city=Auckland&page=0&pageSize=9&search=123+
+Queen+St&exact=true
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:45:13)
+
+    console.log
+      Received response with 0 properties
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:75:13)
+
+    console.log
+      Fetching forecast properties for city: Auckland
+
+      at fetchForecastPropertiesByCity (src/services/forecastService.ts:20:13)
+
+    console.log
+      Making request to: /api/forecast?city=Auckland&page=0&pageSize=9
+
+      at fetchForecastPropertiesByCity (src/services/forecastService.ts:23:13)
+
+    console.log
+      Fetched forecast properties count: 1
+
+      at fetchForecastPropertiesByCity (src/services/forecastService.ts:48:13)
+
+    console.log
+      Fetching forecast properties for city: Auckland
+
+      at fetchForecastPropertiesByCity (src/services/forecastService.ts:20:13)
+
+    console.log
+      Making request to: /api/forecast?city=Auckland&page=1&pageSize=20&suburbs=Au
+ckland+Central%2CParnell
+
+      at fetchForecastPropertiesByCity (src/services/forecastService.ts:23:13)
+
+    console.log
+      Fetched forecast properties count: 0
+
+      at fetchForecastPropertiesByCity (src/services/forecastService.ts:48:13)
+
+    console.log
+      Fetching forecast properties for city: Auckland
+
+      at fetchForecastPropertiesByCity (src/services/forecastService.ts:20:13)
+
+    console.log
+      Making request to: /api/forecast?city=Auckland&page=0&pageSize=9
+
+      at fetchForecastPropertiesByCity (src/services/forecastService.ts:23:13)
+
+    console.error
+      Error in fetchForecastPropertiesByCity: TypeError: response.text is not a fu
+nction
+          at fetchForecastPropertiesByCity (C:\Projects\HouseWorkspace\nzlouis-pro
+perty-ai\src\services\forecastService.ts:30:40)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at async Object.<anonymous> (C:\Projects\HouseWorkspace\nzlouis-property
+-ai\src\__tests__\hfApiIntegration.test.ts:211:7)
+
+    [0m [90m 49 |[39m     [36mreturn[39m data [36mas[39m [33mProperty[39m
+[][33m;[39m
+     [90m 50 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 51 |[39m     console[33m.[39merror([32m"Error in
+ fetchForecastPropertiesByCity:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 52 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 53 |[39m   }
+     [90m 54 |[39m }[0m
+
+      at fetchForecastPropertiesByCity (src/services/forecastService.ts:51:13)
+      at async Object.<anonymous> (src/__tests__/hfApiIntegration.test.ts:211:7)
+
+  ΓùÅ HF FastAPI Integration Tests ΓÇ║ propertyService ΓÇ║ should handle API error
+s correctly
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "Failed to fetch properties: Database timeout"
+    Received message:   "response.text is not a function"
+
+        [0m [90m 54 |[39m       [90m// Try to parse JSON error, but handle non
+-JSON responses[39m
+         [90m 55 |[39m       [36mlet[39m errorMessage [33m=[39m [32m`Server
+ error (${response.status})`[39m[33m;[39m
+        [31m[1m>[22m[39m[90m 56 |[39m       [36mconst[39m errorText [33m=
+[39m [36mawait[39m response[33m.[39mtext()[33m;[39m
+         [90m    |[39m                                        [31m[1m^[22m[3
+9m
+         [90m 57 |[39m       [36mtry[39m {
+         [90m 58 |[39m         [36mconst[39m errorData [33m=[39m [33mJSON[
+39m[33m.[39mparse(errorText)[33m;[39m
+         [90m 59 |[39m         [36mif[39m ([36mtypeof[39m errorData [33m===
+[39m [32m'object'[39m [33m&&[39m errorData [33m!==[39m [36mnull[39m) {[0
+m
+
+      at fetchPropertiesByCity (src/services/propertyService.ts:56:40)
+      at async Object.<anonymous> (src/__tests__/hfApiIntegration.test.ts:123:7)
+      at Object.toThrow (node_modules/expect/build/index.js:218:22)
+      at Object.<anonymous> (src/__tests__/hfApiIntegration.test.ts:123:69)
+
+  ΓùÅ HF FastAPI Integration Tests ΓÇ║ forecastService ΓÇ║ should handle forecast 
+API errors
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "Failed to fetch forecast properties: No forecast data ava
+ilable"
+    Received message:   "response.text is not a function"
+
+        [0m [90m 28 |[39m       [90m// Try to parse JSON error, but handle non
+-JSON responses[39m
+         [90m 29 |[39m       [36mlet[39m errorMessage [33m=[39m [32m`Server
+ error (${response.status})`[39m[33m;[39m
+        [31m[1m>[22m[39m[90m 30 |[39m       [36mconst[39m errorText [33m=
+[39m [36mawait[39m response[33m.[39mtext()[33m;[39m
+         [90m    |[39m                                        [31m[1m^[22m[3
+9m
+         [90m 31 |[39m       [36mtry[39m {
+         [90m 32 |[39m         [36mconst[39m errorData [33m=[39m [33mJSON[
+39m[33m.[39mparse(errorText)[33m;[39m
+         [90m 33 |[39m         [36mif[39m ([36mtypeof[39m errorData [33m===
+[39m [32m'object'[39m [33m&&[39m errorData [33m!==[39m [36mnull[39m) {[0
+m
+
+      at fetchForecastPropertiesByCity (src/services/forecastService.ts:30:40)
+      at async Object.<anonymous> (src/__tests__/hfApiIntegration.test.ts:211:7)
+      at Object.toThrow (node_modules/expect/build/index.js:218:22)
+      at Object.<anonymous> (src/__tests__/hfApiIntegration.test.ts:213:17)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 9 passed, 11 total
+Snapshots:   0 total
+Time:        0.357 s
+Ran all test suites matching /src\\__tests__\\hfApiIntegration.test.ts/i.

@@ -1,44 +1,21 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-// Supabase client (server-side only)
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_KEY!
-);
-
 export async function GET() {
-  try {
-    console.log("Fetching latest database analysis stats");
+  console.log("Database Analysis API route called (Database Disabled)");
 
-    // Get the latest record from the stats table (highest ID)
-    const { data, error } = await supabase
-      .from('database_analysis_stats')
-      .select('*')
-      .order('id', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      console.error('Error fetching database analysis stats:', error);
-      return NextResponse.json({ error: 'Failed to fetch database analysis stats' }, { status: 500 });
-    }
-
-    if (!data) {
-      console.log("No stats data found in database");
-      return NextResponse.json({ error: 'No statistics data available' }, { status: 404 });
-    }
-
-    // Return the collected data
-    return NextResponse.json({
-      message: "Database analysis stats fetched successfully",
-      ...data
-    });
-  } catch (error: any) {
-    console.error('Database analysis API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
-    );
-  }
+  // Default mock response when database is disabled
+  return NextResponse.json({
+    message: "Database analysis stats (Database Disabled)",
+    auckland_properties: 0,
+    wellington_properties: 0,
+    auckland_forecast_total: 0,
+    wellington_forecast_total: 0,
+    auckland_forecast_90_percent: 0,
+    auckland_forecast_80_percent: 0,
+    auckland_forecast_60_percent: 0,
+    wellington_forecast_90_percent: 0,
+    wellington_forecast_80_percent: 0,
+    wellington_forecast_60_percent: 0
+  });
 }
+

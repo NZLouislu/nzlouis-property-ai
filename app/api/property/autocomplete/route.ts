@@ -1,56 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_KEY!;
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get('q');
   const city = searchParams.get('city');
 
-  // Require at least 2 characters (database indexes will handle performance)
-  if (!query || query.length < 2) {
-    return NextResponse.json([]);
-  }
+  console.log("Autocomplete API route called (Database Disabled):", { query, city });
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  try {
-    const { error: tableCheckError } = await supabase.from('properties').select('id').limit(1);
-    const tableName = tableCheckError ? 'properties_view' : 'properties';
-
-    let queryBuilder = supabase
-      .from(tableName)
-      .select('id, address, suburb, city');
-    
-    // Use starts-with for short queries (better performance), contains for longer queries
-    if (query.length <= 2) {
-      queryBuilder = queryBuilder.ilike('address', `${query}%`);
-    } else {
-      queryBuilder = queryBuilder.ilike('address', `%${query}%`);
-    }
-
-    if (city && city !== 'all-cities') {
-      queryBuilder = queryBuilder.eq('city', city);
-    }
-
-    const { data, error } = await queryBuilder
-      .order('address')
-      .limit(20);
-
-    if (error) {
-      console.error('Autocomplete error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    const uniqueAddresses = Array.from(
-      new Map(data?.map(item => [item.address, item]) || []).values()
-    );
-
-    return NextResponse.json(uniqueAddresses);
-  } catch (error) {
-    console.error('Autocomplete error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
+  return NextResponse.json([]);
 }
+

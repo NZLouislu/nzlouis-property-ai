@@ -37,7 +37,7 @@ describe("HF FastAPI Integration Tests", () => {
   describe("propertyService", () => {
     it("should call API endpoint with correct parameters", async () => {
       const { fetchPropertiesByCity } = require("../services/propertyService");
-      
+
       const mockProperties: Property[] = [
         {
           id: "1",
@@ -117,6 +117,7 @@ describe("HF FastAPI Integration Tests", () => {
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
+        text: async () => JSON.stringify({ error: "Database timeout" }),
         json: async () => ({ error: "Database timeout" }),
       });
 
@@ -205,6 +206,7 @@ describe("HF FastAPI Integration Tests", () => {
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
+        text: async () => JSON.stringify({ error: "No forecast data available" }),
         json: async () => ({ error: "No forecast data available" }),
       });
 
