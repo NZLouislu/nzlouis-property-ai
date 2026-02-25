@@ -15,8 +15,8 @@ interface LocationSelectorProps {
 
 const LocationSelector: React.FC<LocationSelectorProps> = ({
   onSelectionChange,
-  defaultRegion = 'Wellington',
-  defaultCity = 'Wellington City',
+  defaultRegion = 'Auckland',
+  defaultCity = 'Auckland',
   defaultSuburb = 'all-suburbs'
 }) => {
   const { regions, loading } = useRegions();

@@ -116,8 +116,8 @@ export default function ForecastPage() {
           <div style={{ flex: "1", minWidth: "200px" }}>
             <LocationSelector
               onSelectionChange={handleLocationChange}
-              defaultRegion="Wellington"
-              defaultCity="Wellington City"
+              defaultRegion="Auckland"
+              defaultCity="Auckland"
               defaultSuburb="all-suburbs"
             />
           </div>
