@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
   forecast: `${API_BASE_URL}/api/forecast`,
   forecastAutocomplete: `${API_BASE_URL}/api/forecast/autocomplete`,
   regions: `${API_BASE_URL}/api/regions`,
+  databaseAnalysis: `${API_BASE_URL}/api/database-analysis`,
   health: `${API_BASE_URL}/health`,
 } as const;
 
@@ -36,5 +37,5 @@ export function isUsingHfApi(): boolean {
 // API configuration
 export const API_CONFIG = {
   timeout: 30000, // Increased timeout to 30s for AI/Data operations
-  retries: 2, 
+  retries: 2,
 } as const;

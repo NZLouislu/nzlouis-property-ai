@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { API_ENDPOINTS } from '../config/api';
 
 interface DatabaseAnalysisData {
   // Original fields (for backward compatibility)
@@ -7,7 +8,7 @@ interface DatabaseAnalysisData {
   wellingtonProperties?: number;
   aucklandForecast?: number;
   wellingtonForecast?: number;
-  
+
   // New fields (recommended)
   auckland_properties?: number;
   wellington_properties?: number;
@@ -60,7 +61,7 @@ export const useDatabaseAnalysisStore = create<DatabaseAnalysisState>()(
         set({ loading: true, error: null });
 
         try {
-          const response = await fetch('/api/database-analysis');
+          const response = await fetch(API_ENDPOINTS.databaseAnalysis);
 
           if (!response.ok) {
             throw new Error('Failed to fetch database analysis data');

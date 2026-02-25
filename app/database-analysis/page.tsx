@@ -54,7 +54,22 @@ export default function DatabaseAnalysisPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
           <div>
             <h1>Database Analysis</h1>
+            {lastFetch && <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", margin: "4px 0 0 0" }}>Last fetched: {new Date(lastFetch).toLocaleString()}</p>}
           </div>
+          <button
+            onClick={handleRefresh}
+            style={{
+              padding: "8px 18px",
+              borderRadius: "8px",
+              border: "1px solid var(--card-border)",
+              backgroundColor: "var(--card-bg)",
+              color: "var(--foreground)",
+              cursor: "pointer",
+              fontSize: "0.9rem",
+            }}
+          >
+            Refresh
+          </button>
         </div>
 
         <section style={{ marginBottom: "30px" }}>
@@ -73,7 +88,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington Total Properties</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.wellington_properties || data.wellingtonProperties}
+                {data.wellington_properties ?? data.wellingtonProperties ?? 0}
               </p>
             </div>
 
@@ -85,7 +100,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington Forecast Total</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.wellington_forecast_total || data.wellingtonForecast}
+                {data.wellington_forecast_total ?? data.wellingtonForecast ?? 0}
               </p>
             </div>
 
@@ -98,7 +113,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland Total Properties</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.auckland_properties || data.aucklandProperties}
+                {data.auckland_properties ?? data.aucklandProperties ?? 0}
               </p>
             </div>
 
@@ -110,7 +125,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland Forecast Total</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.auckland_forecast_total || data.aucklandForecast}
+                {data.auckland_forecast_total ?? data.aucklandForecast ?? 0}
               </p>
             </div>
           </div>
@@ -133,7 +148,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington 90% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.wellington_forecast_90_percent}
+                {data.wellington_forecast_90_percent ?? 0}
               </p>
             </div>
 
@@ -145,7 +160,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington 80% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.wellington_forecast_80_percent}
+                {data.wellington_forecast_80_percent ?? 0}
               </p>
             </div>
 
@@ -157,7 +172,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington 60% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.wellington_forecast_60_percent}
+                {data.wellington_forecast_60_percent ?? 0}
               </p>
             </div>
 
@@ -170,7 +185,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland 90% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.auckland_forecast_90_percent}
+                {data.auckland_forecast_90_percent ?? 0}
               </p>
             </div>
 
@@ -182,7 +197,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland 80% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.auckland_forecast_80_percent}
+                {data.auckland_forecast_80_percent ?? 0}
               </p>
             </div>
 
@@ -194,7 +209,7 @@ export default function DatabaseAnalysisPage() {
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland 60% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
-                {data.auckland_forecast_60_percent}
+                {data.auckland_forecast_60_percent ?? 0}
               </p>
             </div>
           </div>
@@ -210,16 +225,16 @@ export default function DatabaseAnalysisPage() {
             color: "var(--foreground)"
           }}>
             <p>
-              Wellington has <strong>{data.wellington_properties || data.wellingtonProperties} total properties</strong> and <strong>{data.wellington_forecast_total || data.wellingtonForecast} forecast records</strong>.
+              Wellington has <strong>{data.wellington_properties ?? data.wellingtonProperties ?? 0} total properties</strong> and <strong>{data.wellington_forecast_total ?? data.wellingtonForecast ?? 0} forecast records</strong>.
             </p>
             <p>
-              Auckland has <strong>{data.auckland_properties || data.aucklandProperties} total properties</strong> and <strong>{data.auckland_forecast_total || data.aucklandForecast} forecast records</strong>.
+              Auckland has <strong>{data.auckland_properties ?? data.aucklandProperties ?? 0} total properties</strong> and <strong>{data.auckland_forecast_total ?? data.aucklandForecast ?? 0} forecast records</strong>.
             </p>
             <p>
-              Wellington 90% confidence forecast: <strong>{data.wellington_forecast_90_percent} properties</strong>.
+              Wellington 90% confidence forecast: <strong>{data.wellington_forecast_90_percent ?? 0} properties</strong>.
             </p>
             <p>
-              Auckland 90% confidence forecast: <strong>{data.auckland_forecast_90_percent} properties</strong>.
+              Auckland 90% confidence forecast: <strong>{data.auckland_forecast_90_percent ?? 0} properties</strong>.
             </p>
           </div>
         </section>
