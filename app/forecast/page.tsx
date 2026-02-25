@@ -9,8 +9,8 @@ import AddressAutocomplete from "@/src/components/AddressAutocomplete";
 
 export default function ForecastPage() {
   const lastPropertyElementRef = useRef<HTMLDivElement>(null);
-  const [selectedRegion, setSelectedRegion] = useState("Wellington");
-  const [selectedCity, setSelectedCity] = useState("Wellington City");
+  const [selectedRegion, setSelectedRegion] = useState("Auckland");
+  const [selectedCity, setSelectedCity] = useState("Auckland");
   const [selectedSuburb, setSelectedSuburb] = useState<string>("all-suburbs");
 
   // inputValue controls the input field and autocomplete

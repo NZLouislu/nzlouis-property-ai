@@ -9,7 +9,7 @@ import AddressAutocomplete from "@/src/components/AddressAutocomplete";
 
 export default function PropertyPage() {
   const lastPropertyElementRef = useRef<HTMLDivElement>(null);
-  const [selectedCity, setSelectedCity] = useState("Wellington City");
+  const [selectedCity, setSelectedCity] = useState("Auckland");
   const [selectedSuburb, setSelectedSuburb] = useState<string>("all-suburbs");
 
   const [inputValue, setInputValue] = useState<string>("");
