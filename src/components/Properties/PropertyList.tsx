@@ -29,11 +29,11 @@ const PropertyCard: React.FC<{
   return (
     <div
       style={{
-        border: "1px solid #e2e8f0",
+        border: "1px solid var(--card-border)",
         borderRadius: "16px",
         overflow: "hidden",
-        boxShadow: "0 8px 16px rgba(0,0,0,0.08)",
-        backgroundColor: "#fff",
+        boxShadow: "var(--shadow)",
+        backgroundColor: "var(--card-bg)",
         transition: "all 0.3s ease",
         height: "100%",
         display: "flex",
@@ -51,7 +51,7 @@ const PropertyCard: React.FC<{
       }}
     >
       <div style={{ position: "relative" }}>
-      <a
+        <a
           href={property.property_url}
           target="_blank"
           rel="noopener noreferrer"
@@ -229,7 +229,7 @@ const PropertyCard: React.FC<{
               margin: 0,
               fontSize: "1.3rem",
               fontWeight: "700",
-              color: "#2d3748",
+              color: "var(--text-heading)",
               flex: 1,
               lineHeight: "1.3",
             }}
@@ -243,7 +243,7 @@ const PropertyCard: React.FC<{
             display: "flex",
             alignItems: "center",
             marginBottom: "18px",
-            color: "#718096",
+            color: "var(--text-muted)",
             fontSize: "0.95rem",
           }}
         >
@@ -279,7 +279,7 @@ const PropertyCard: React.FC<{
               <span
                 style={{
                   fontWeight: "700",
-                  color: "#2d3748",
+                  color: "var(--text-heading)",
                   fontSize: "1.4rem",
                 }}
               >
@@ -302,7 +302,7 @@ const PropertyCard: React.FC<{
               <span
                 style={{
                   fontWeight: "500",
-                  color: "#718096",
+                  color: "var(--text-muted)",
                   fontSize: "0.9rem",
                 }}
               >
@@ -318,25 +318,24 @@ const PropertyCard: React.FC<{
                       property.confidence_score > 0.7
                         ? "#dcfce7"
                         : property.confidence_score > 0.5
-                        ? "#fef9c3"
-                        : "#fee2e2",
+                          ? "#fef9c3"
+                          : "#fee2e2",
                     color:
                       property.confidence_score > 0.7
                         ? "#166534"
                         : property.confidence_score > 0.5
-                        ? "#854d0e"
-                        : "#991b1b",
+                          ? "#854d0e"
+                          : "#991b1b",
                     padding: "6px 12px",
                     borderRadius: "20px",
                     fontSize: "0.85rem",
                     fontWeight: "600",
-                    border: `1px solid ${
-                      property.confidence_score > 0.7
-                        ? "#bbf7d0"
-                        : property.confidence_score > 0.5
+                    border: `1px solid ${property.confidence_score > 0.7
+                      ? "#bbf7d0"
+                      : property.confidence_score > 0.5
                         ? "#fde047"
                         : "#fecaca"
-                    }`,
+                      }`,
                     marginTop: "10px",
                     display: "inline-block",
                   }
@@ -351,7 +350,7 @@ const PropertyCard: React.FC<{
 
         <div
           style={{
-            borderTop: "1px solid #edf2f7",
+            borderTop: "1px solid var(--card-border)",
             paddingTop: "20px",
             marginTop: "auto",
           }}
@@ -382,7 +381,7 @@ const PropertyCard: React.FC<{
                 <span
                   style={{
                     fontWeight: "600",
-                    color: "#2d3748",
+                    color: "var(--text-heading)",
                     fontSize: "1.1rem",
                   }}
                 >
@@ -392,7 +391,7 @@ const PropertyCard: React.FC<{
               <div
                 style={{
                   fontSize: "0.8rem",
-                  color: "#718096",
+                  color: "var(--text-muted)",
                   fontWeight: "500",
                 }}
               >
@@ -419,7 +418,7 @@ const PropertyCard: React.FC<{
                 <span
                   style={{
                     fontWeight: "600",
-                    color: "#2d3748",
+                    color: "var(--text-heading)",
                     fontSize: "1.1rem",
                   }}
                 >
@@ -429,7 +428,7 @@ const PropertyCard: React.FC<{
               <div
                 style={{
                   fontSize: "0.8rem",
-                  color: "#718096",
+                  color: "var(--text-muted)",
                   fontWeight: "500",
                 }}
               >
@@ -456,7 +455,7 @@ const PropertyCard: React.FC<{
                 <span
                   style={{
                     fontWeight: "600",
-                    color: "#2d3748",
+                    color: "var(--text-heading)",
                     fontSize: "1.1rem",
                   }}
                 >
@@ -466,7 +465,7 @@ const PropertyCard: React.FC<{
               <div
                 style={{
                   fontSize: "0.8rem",
-                  color: "#718096",
+                  color: "var(--text-muted)",
                   fontWeight: "500",
                 }}
               >
@@ -493,7 +492,7 @@ const PropertyCard: React.FC<{
                 <span
                   style={{
                     fontWeight: "600",
-                    color: "#2d3748",
+                    color: "var(--text-heading)",
                     fontSize: "1.1rem",
                   }}
                 >
@@ -503,7 +502,7 @@ const PropertyCard: React.FC<{
               <div
                 style={{
                   fontSize: "0.8rem",
-                  color: "#718096",
+                  color: "var(--text-muted)",
                   fontWeight: "500",
                 }}
               >
@@ -540,174 +539,174 @@ const PropertyList: React.FC<{
   favorites = new Set(),
   onFavoriteToggle,
 }) => {
-  if (isLoading) {
-    return (
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-          gap: "30px",
-        }}
-      >
-        {[...Array(6)].map((_, index) => (
-          <div
-            key={index}
+    if (isLoading) {
+      return (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: "30px",
+          }}
+        >
+          {[...Array(6)].map((_, index) => (
+            <div
+              key={index}
+              style={{
+                border: "1px solid var(--card-border)",
+                borderRadius: "16px",
+                overflow: "hidden",
+                boxShadow: "var(--shadow)",
+                backgroundColor: "var(--card-bg)",
+                height: "400px",
+                transition: "all 0.3s ease",
+              }}
+            >
+              <div
+                style={{
+                  height: "220px",
+                  backgroundColor: "#f1f5f9",
+                  animation: "pulse 1.5s ease-in-out infinite",
+                }}
+              ></div>
+              <div style={{ padding: "20px" }}>
+                <div
+                  style={{
+                    height: "24px",
+                    backgroundColor: "#f1f5f9",
+                    marginBottom: "12px",
+                    animation: "pulse 1.5s ease-in-out infinite",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    height: "18px",
+                    backgroundColor: "#f1f5f9",
+                    marginBottom: "10px",
+                    animation: "pulse 1.5s ease-in-out infinite",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    height: "18px",
+                    backgroundColor: "#f1f5f9",
+                    animation: "pulse 1.5s ease-in-out infinite",
+                  }}
+                ></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (isError) {
+      return (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "60px 30px",
+            color: "var(--error-text)",
+            backgroundColor: "var(--error-bg)",
+            borderRadius: "12px",
+            border: "1px solid var(--error-border)",
+            boxShadow: "var(--shadow)",
+          }}
+        >
+          <h3 style={{ fontSize: "1.5rem", marginBottom: "12px" }}>
+            Error loading properties
+          </h3>
+          <p style={{ fontSize: "1rem", whiteSpace: "pre-line" }}>
+            {error?.message || "Failed to load properties"}
+          </p>
+          {error?.message?.includes("timeout") && (
+            <p style={{
+              fontSize: "0.9rem",
+              marginTop: "16px",
+              color: "var(--text-muted)",
+              fontStyle: "italic"
+            }}>
+              This may be due to a temporary server issue or database timeout. Please try again later.
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    if (properties.length === 0) {
+      return (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "80px 30px",
+            color: "var(--text-muted)",
+            backgroundColor: "var(--card-bg)",
+            borderRadius: "16px",
+            border: "1px solid var(--card-border)",
+          }}
+        >
+          <h3
             style={{
-              border: "1px solid #e0e0e0",
-              borderRadius: "16px",
-              overflow: "hidden",
-              boxShadow: "0 8px 16px rgba(0,0,0,0.08)",
-              backgroundColor: "#fff",
-              height: "400px",
-              transition: "all 0.3s ease",
+              fontSize: "1.8rem",
+              marginBottom: "16px",
+              color: "var(--text-heading)",
+            }}
+          >
+            No properties found
+          </h3>
+          <p style={{ fontSize: "1.1rem" }}>Try adjusting your search criteria</p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: "30px",
+          }}
+        >
+          {properties.map((p, index) => {
+            const ref =
+              index === properties.length - 1 && lastPropertyElementRef
+                ? lastPropertyElementRef
+                : undefined;
+            return (
+              <div key={`${p.id}-${index}`} ref={ref}>
+                <PropertyCard
+                  property={p}
+                  onFavoriteToggle={onFavoriteToggle}
+                  isFavorite={favorites.has(p.id)}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        {isFetchingNextPage && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "30px",
+              display: "flex",
+              justifyContent: "center",
             }}
           >
             <div
               style={{
-                height: "220px",
-                backgroundColor: "#f1f5f9",
-                animation: "pulse 1.5s ease-in-out infinite",
+                width: "48px",
+                height: "48px",
+                border: "4px solid #f3f4f6",
+                borderTop: "4px solid #3b82f6",
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite",
               }}
             ></div>
-            <div style={{ padding: "20px" }}>
-              <div
-                style={{
-                  height: "24px",
-                  backgroundColor: "#f1f5f9",
-                  marginBottom: "12px",
-                  animation: "pulse 1.5s ease-in-out infinite",
-                }}
-              ></div>
-              <div
-                style={{
-                  height: "18px",
-                  backgroundColor: "#f1f5f9",
-                  marginBottom: "10px",
-                  animation: "pulse 1.5s ease-in-out infinite",
-                }}
-              ></div>
-              <div
-                style={{
-                  height: "18px",
-                  backgroundColor: "#f1f5f9",
-                  animation: "pulse 1.5s ease-in-out infinite",
-                }}
-              ></div>
-            </div>
           </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "60px 30px",
-          color: "#e53e3e",
-          backgroundColor: "#fff5f5",
-          borderRadius: "12px",
-          border: "1px solid #fed7d7",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-        }}
-      >
-        <h3 style={{ fontSize: "1.5rem", marginBottom: "12px" }}>
-          Error loading properties
-        </h3>
-        <p style={{ fontSize: "1rem", whiteSpace: "pre-line" }}>
-          {error?.message || "Failed to load properties"}
-        </p>
-        {error?.message?.includes("timeout") && (
-          <p style={{ 
-            fontSize: "0.9rem", 
-            marginTop: "16px", 
-            color: "#718096",
-            fontStyle: "italic"
-          }}>
-            This may be due to a temporary server issue or database timeout. Please try again later.
-          </p>
         )}
-      </div>
-    );
-  }
 
-  if (properties.length === 0) {
-    return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "80px 30px",
-          color: "#718096",
-          backgroundColor: "#f8fafc",
-          borderRadius: "16px",
-          border: "1px solid #e2e8f0",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "1.8rem",
-            marginBottom: "16px",
-            color: "#4a5568",
-          }}
-        >
-          No properties found
-        </h3>
-        <p style={{ fontSize: "1.1rem" }}>Try adjusting your search criteria</p>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-          gap: "30px",
-        }}
-      >
-        {properties.map((p, index) => {
-          const ref =
-            index === properties.length - 1 && lastPropertyElementRef
-              ? lastPropertyElementRef
-              : undefined;
-          return (
-            <div key={`${p.id}-${index}`} ref={ref}>
-              <PropertyCard
-                property={p}
-                onFavoriteToggle={onFavoriteToggle}
-                isFavorite={favorites.has(p.id)}
-              />
-            </div>
-          );
-        })}
-      </div>
-
-      {isFetchingNextPage && (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "30px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              width: "48px",
-              height: "48px",
-              border: "4px solid #f3f4f6",
-              borderTop: "4px solid #3b82f6",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          ></div>
-        </div>
-      )}
-
-      <style jsx>{`
+        <style jsx>{`
         @keyframes spin {
           0% {
             transform: rotate(0deg);
@@ -729,8 +728,8 @@ const PropertyList: React.FC<{
           }
         }
       `}</style>
-    </>
-  );
-};
+      </>
+    );
+  };
 
 export default PropertyList;

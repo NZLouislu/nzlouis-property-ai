@@ -11,16 +11,16 @@ export default function PropertyPage() {
   const lastPropertyElementRef = useRef<HTMLDivElement>(null);
   const [selectedCity, setSelectedCity] = useState("Wellington City");
   const [selectedSuburb, setSelectedSuburb] = useState<string>("all-suburbs");
-  
+
   const [inputValue, setInputValue] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isExactSearch, setIsExactSearch] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | undefined>();
 
   const suburbsForQuery = selectedSuburb === "all-suburbs" ? undefined : [selectedSuburb];
-  
+
   console.log("PropertyPage rendering with:", { selectedCity, selectedSuburb, suburbsForQuery, searchQuery, isExactSearch, selectedPropertyId });
-  
+
   const {
     data,
     isFetchingNextPage,
@@ -44,14 +44,14 @@ export default function PropertyPage() {
     const handleBeforeUnload = () => {
       sessionStorage.setItem('propertyScrollPosition', window.scrollY.toString());
     };
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
   useEffect(() => {
     console.log("IntersectionObserver effect triggered", { hasNextPage, isFetchingNextPage });
-    
+
     const currentElement = lastPropertyElementRef.current;
     if (!currentElement) {
       console.log("No element to observe");
@@ -59,12 +59,12 @@ export default function PropertyPage() {
     }
 
     const observer = new IntersectionObserver((entries) => {
-      console.log("IntersectionObserver callback", { 
-        isIntersecting: entries[0].isIntersecting, 
-        hasNextPage, 
-        isFetchingNextPage 
+      console.log("IntersectionObserver callback", {
+        isIntersecting: entries[0].isIntersecting,
+        hasNextPage,
+        isFetchingNextPage
       });
-      
+
       if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
         console.log("Fetching next page...");
         fetchNextPage();
@@ -83,10 +83,10 @@ export default function PropertyPage() {
     ? propertiesData.pages.flatMap((page) => page)
     : [];
 
-  const handleLocationChange = (selection: { 
-    region: string; 
-    city: string; 
-    suburb: string 
+  const handleLocationChange = (selection: {
+    region: string;
+    city: string;
+    suburb: string
   }) => {
     console.log("Location changed:", selection);
     if (selection.city !== selectedCity || selection.suburb !== selectedSuburb) {
@@ -120,19 +120,20 @@ export default function PropertyPage() {
         style={{
           marginBottom: "32px",
           padding: "20px",
-          backgroundColor: "#f8f9fa",
+          backgroundColor: "var(--card-bg)",
           borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+          boxShadow: "var(--shadow)",
+          border: "1px solid var(--card-border)",
         }}
       >
-        <div style={{ 
+        <div style={{
           display: "flex",
           gap: "16px",
           marginBottom: "16px",
           flexWrap: "wrap",
         }}>
           <div style={{ flex: "1", minWidth: "200px" }}>
-            <LocationSelector 
+            <LocationSelector
               onSelectionChange={handleLocationChange}
               defaultRegion="Wellington"
               defaultCity="Wellington City"
@@ -140,7 +141,7 @@ export default function PropertyPage() {
             />
           </div>
         </div>
-        
+
         <AddressAutocomplete
           value={inputValue}
           city={selectedCity}
@@ -169,10 +170,10 @@ export default function PropertyPage() {
         <div style={{
           padding: "16px",
           marginBottom: "24px",
-          backgroundColor: "#fee",
-          border: "1px solid #fcc",
+          backgroundColor: "var(--error-bg)",
+          border: "1px solid var(--error-border)",
           borderRadius: "8px",
-          color: "#c33",
+          color: "var(--error-text)",
           textAlign: "center"
         }}>
           Error loading properties: {error?.message || "Unknown error occurred"}

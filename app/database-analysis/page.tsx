@@ -56,7 +56,7 @@ export default function DatabaseAnalysisPage() {
             <h1>Database Analysis</h1>
           </div>
         </div>
-        
+
         <section style={{ marginBottom: "30px" }}>
           <h2>Property Statistics</h2>
           <div style={{
@@ -66,10 +66,10 @@ export default function DatabaseAnalysisPage() {
           }}>
             {/* Wellington first */}
             <div style={{
-              border: "1px solid #cbd5e1",
+              border: "1px solid var(--card-border)",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f8fafc"
+              backgroundColor: "var(--card-bg)"
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington Total Properties</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
@@ -78,10 +78,10 @@ export default function DatabaseAnalysisPage() {
             </div>
 
             <div style={{
-              border: "1px solid #cbd5e1",
+              border: "1px solid var(--card-border)",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f8fafc"
+              backgroundColor: "var(--card-bg)"
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington Forecast Total</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
@@ -91,10 +91,10 @@ export default function DatabaseAnalysisPage() {
 
             {/* Auckland second */}
             <div style={{
-              border: "1px solid #cbd5e1",
+              border: "1px solid var(--card-border)",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f8fafc"
+              backgroundColor: "var(--card-bg)"
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland Total Properties</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
@@ -103,10 +103,10 @@ export default function DatabaseAnalysisPage() {
             </div>
 
             <div style={{
-              border: "1px solid #cbd5e1",
+              border: "1px solid var(--card-border)",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f8fafc"
+              backgroundColor: "var(--card-bg)"
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland Forecast Total</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
@@ -126,10 +126,10 @@ export default function DatabaseAnalysisPage() {
           }}>
             {/* Wellington first */}
             <div style={{
-              border: "1px solid #cbd5e1",
+              border: "1px solid var(--card-border)",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f0f9ff"
+              backgroundColor: "var(--card-bg)"
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington 90% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
@@ -138,10 +138,10 @@ export default function DatabaseAnalysisPage() {
             </div>
 
             <div style={{
-              border: "1px solid #cbd5e1",
+              border: "1px solid var(--card-border)",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f0f9ff"
+              backgroundColor: "var(--card-bg)"
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington 80% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
@@ -150,10 +150,10 @@ export default function DatabaseAnalysisPage() {
             </div>
 
             <div style={{
-              border: "1px solid #cbd5e1",
+              border: "1px solid var(--card-border)",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f0f9ff"
+              backgroundColor: "var(--card-bg)"
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Wellington 60% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
@@ -163,10 +163,10 @@ export default function DatabaseAnalysisPage() {
 
             {/* Auckland second */}
             <div style={{
-              border: "1px solid #cbd5e1",
+              border: "1px solid var(--card-border)",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f0f9ff"
+              backgroundColor: "var(--card-bg)"
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland 90% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
@@ -175,10 +175,10 @@ export default function DatabaseAnalysisPage() {
             </div>
 
             <div style={{
-              border: "1px solid #cbd5e1",
+              border: "1px solid var(--card-border)",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f0f9ff"
+              backgroundColor: "var(--card-bg)"
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland 80% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
@@ -187,10 +187,10 @@ export default function DatabaseAnalysisPage() {
             </div>
 
             <div style={{
-              border: "1px solid #cbd5e1",
+              border: "1px solid var(--card-border)",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f0f9ff"
+              backgroundColor: "var(--card-bg)"
             }}>
               <h3 style={{ margin: "0 0 10px 0" }}>Auckland 60% Confidence</h3>
               <p style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
@@ -203,10 +203,11 @@ export default function DatabaseAnalysisPage() {
         <section>
           <h2>Analysis Summary</h2>
           <div style={{
-            border: "1px solid #cbd5e1",
+            border: "1px solid var(--card-border)",
             borderRadius: "5px",
             padding: "20px",
-            backgroundColor: "#f1f5f9"
+            backgroundColor: "var(--card-bg)",
+            color: "var(--foreground)"
           }}>
             <p>
               Wellington has <strong>{data.wellington_properties || data.wellingtonProperties} total properties</strong> and <strong>{data.wellington_forecast_total || data.wellingtonForecast} forecast records</strong>.

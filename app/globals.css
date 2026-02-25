@@ -3,6 +3,17 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --text-muted: #718096;
+  --text-heading: #2d3748;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --header-bg: rgba(255, 255, 255, 0.3);
+  --error-bg: #fff5f5;
+  --error-text: #c53030;
+  --error-border: #feb2b2;
 }
 
 @theme inline {
@@ -16,6 +27,17 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --card-bg: #1a1a1a;
+    --card-border: #2d3748;
+    --input-bg: #1a1a1a;
+    --input-border: #2d3748;
+    --text-muted: #a0aec0;
+    --text-heading: #f7fafc;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --header-bg: rgba(0, 0, 0, 0.3);
+    --error-bg: #2d1a1a;
+    --error-text: #fc8181;
+    --error-border: #9b2c2c;
   }
 }
 

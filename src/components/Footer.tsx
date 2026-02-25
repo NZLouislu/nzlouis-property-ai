@@ -4,7 +4,7 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer style={{ backgroundColor: "#f7fafc", padding: "12px 0" }}>
+    <footer style={{ backgroundColor: "var(--background)", padding: "12px 0" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 16px" }}>
         <div
           style={{
@@ -14,10 +14,10 @@ const Footer: React.FC = () => {
             alignItems: "center",
             padding: "12px 0",
             margin: "16px 0",
-            borderTop: "1px solid #e2e8f0",
+            borderTop: "1px solid var(--card-border)",
           }}
         >
-          <div style={{ flex: "1", marginBottom: "8px", color: "#718096" }}>
+          <div style={{ flex: "1", marginBottom: "8px", color: "var(--text-muted)" }}>
             &copy; {currentYear} NZ Louis
           </div>
           <div style={{ flex: "1" }}></div> {/* Spacer */}
@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
                 style={{
-                  color: "#718096",
+                  color: "var(--text-muted)",
                   padding: "0 8px",
                   textDecoration: "none",
                 }}
@@ -57,7 +57,7 @@ const Footer: React.FC = () => {
                 target="_blank"
                 rel="noreferrer"
                 style={{
-                  color: "#718096",
+                  color: "var(--text-muted)",
                   padding: "0 8px",
                   textDecoration: "none",
                 }}

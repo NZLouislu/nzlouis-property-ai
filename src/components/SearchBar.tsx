@@ -22,8 +22,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
           width: "100%",
           padding: "8px 12px",
           borderRadius: "4px",
-          border: "1px solid #ddd",
+          border: "1px solid var(--input-border)",
           fontSize: "16px",
+          backgroundColor: "var(--input-bg)",
+          color: "var(--foreground)",
         }}
       />
     </div>

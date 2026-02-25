@@ -107,16 +107,17 @@ export default function AddressAutocomplete({
         style={{
           padding: '14px 18px 14px 40px',
           borderRadius: '10px',
-          border: '2px solid #e2e8f0',
+          border: '2px solid var(--input-border)',
           fontSize: '16px',
           width: '100%',
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--input-bg)',
+          color: 'var(--foreground)',
           boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
           transition: 'all 0.2s',
           boxSizing: 'border-box',
         }}
       />
-      
+
       {showSuggestions && suggestions.length > 0 && (
         <div
           style={{
@@ -125,8 +126,8 @@ export default function AddressAutocomplete({
             left: 0,
             right: 0,
             marginTop: '4px',
-            backgroundColor: '#fff',
-            border: '1px solid #e2e8f0',
+            backgroundColor: 'var(--card-bg)',
+            border: '1px solid var(--card-border)',
             borderRadius: '10px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             maxHeight: '300px',
@@ -141,20 +142,20 @@ export default function AddressAutocomplete({
               style={{
                 padding: '12px 16px',
                 cursor: 'pointer',
-                borderBottom: index < suggestions.length - 1 ? '1px solid #f0f0f0' : 'none',
+                borderBottom: index < suggestions.length - 1 ? '1px solid var(--card-border)' : 'none',
                 transition: 'background-color 0.2s',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f7fafc';
+                e.currentTarget.style.backgroundColor = 'var(--background)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#fff';
+                e.currentTarget.style.backgroundColor = 'var(--card-bg)';
               }}
             >
-              <div style={{ fontWeight: '500', color: '#2D3748', marginBottom: '4px' }}>
+              <div style={{ fontWeight: '500', color: 'var(--text-heading)', marginBottom: '4px' }}>
                 {suggestion.address}
               </div>
-              <div style={{ fontSize: '14px', color: '#718096' }}>
+              <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
                 {suggestion.suburb}, {suggestion.city}
               </div>
             </div>

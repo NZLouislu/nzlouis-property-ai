@@ -19,7 +19,7 @@ export default function NavBar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/30 backdrop-blur-md">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--header-bg)] backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
         <div
           onClick={handleLogoClick}
@@ -57,7 +57,7 @@ export default function NavBar() {
       </div>
 
       {open && (
-        <div className="md:hidden border-t bg-white/30 backdrop-blur-md shadow-md">
+        <div className="md:hidden border-t border-[var(--card-border)] bg-[var(--header-bg)] backdrop-blur-md shadow-md">
           <div className="flex flex-col gap-4 p-4">
             {items.map((i) => (
               <Link

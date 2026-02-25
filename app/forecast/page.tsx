@@ -12,15 +12,15 @@ export default function ForecastPage() {
   const [selectedRegion, setSelectedRegion] = useState("Wellington");
   const [selectedCity, setSelectedCity] = useState("Wellington City");
   const [selectedSuburb, setSelectedSuburb] = useState<string>("all-suburbs");
-  
+
   // inputValue controls the input field and autocomplete
   const [inputValue, setInputValue] = useState<string>("");
-  
+
   // searchQuery controls the actual property list fetching (not implemented in useForecastData yet, but good for future)
   // For now, forecast page still uses client-side filtering for simplicity, or we can update it later.
   // But to fix the "input triggers reload" issue, we should separate them.
   const [searchQuery, setSearchQuery] = useState<string>("");
-  
+
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   const {
@@ -56,10 +56,10 @@ export default function ForecastPage() {
     ? propertiesData.pages.flatMap((page) => page)
     : [];
 
-  const handleLocationChange = (selection: { 
-    region: string; 
-    city: string; 
-    suburb: string 
+  const handleLocationChange = (selection: {
+    region: string;
+    city: string;
+    suburb: string
   }) => {
     setSelectedRegion(selection.region);
     setSelectedCity(selection.city);
@@ -101,19 +101,20 @@ export default function ForecastPage() {
         style={{
           marginBottom: "32px",
           padding: "20px",
-          backgroundColor: "#f8f9fa",
+          backgroundColor: "var(--card-bg)",
           borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+          boxShadow: "var(--shadow)",
+          border: "1px solid var(--card-border)",
         }}
       >
-        <div style={{ 
+        <div style={{
           display: "flex",
           gap: "16px",
           marginBottom: "16px",
           flexWrap: "wrap",
         }}>
           <div style={{ flex: "1", minWidth: "200px" }}>
-            <LocationSelector 
+            <LocationSelector
               onSelectionChange={handleLocationChange}
               defaultRegion="Wellington"
               defaultCity="Wellington City"
@@ -121,7 +122,7 @@ export default function ForecastPage() {
             />
           </div>
         </div>
-        
+
         <AddressAutocomplete
           value={inputValue}
           onChange={(val) => {

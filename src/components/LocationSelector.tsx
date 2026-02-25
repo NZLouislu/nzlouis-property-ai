@@ -56,7 +56,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
   const getSuburbs = () => {
     const region = regions.find(r => r.name === selectedRegion);
     if (!region) return [];
-    
+
     const city = region.cities.find(c => c.name === selectedCity);
     return city ? city.suburbs : [];
   };
@@ -66,22 +66,23 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
   }
 
   return (
-    <div className="location-selector" style={{ 
-      display: "flex", 
-      gap: "16px", 
+    <div className="location-selector" style={{
+      display: "flex",
+      gap: "16px",
       width: "100%",
       flexWrap: "wrap"
     }}>
       <div style={{ flex: "1", minWidth: "150px" }}>
-        <select 
-          value={selectedRegion} 
+        <select
+          value={selectedRegion}
           onChange={(e) => setSelectedRegion(e.target.value)}
           style={{
             padding: "14px 18px",
             borderRadius: "10px",
-            border: "2px solid #e2e8f0",
+            border: "2px solid var(--input-border)",
             fontSize: "16px",
-            backgroundColor: "#fff",
+            backgroundColor: "var(--input-bg)",
+            color: "var(--foreground)",
             boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
             transition: "all 0.2s",
             cursor: "pointer",
@@ -98,15 +99,16 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       </div>
 
       <div style={{ flex: "1", minWidth: "150px" }}>
-        <select 
-          value={selectedCity} 
+        <select
+          value={selectedCity}
           onChange={(e) => setSelectedCity(e.target.value)}
           style={{
             padding: "14px 18px",
             borderRadius: "10px",
-            border: "2px solid #e2e8f0",
+            border: "2px solid var(--input-border)",
             fontSize: "16px",
-            backgroundColor: "#fff",
+            backgroundColor: "var(--input-bg)",
+            color: "var(--foreground)",
             boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
             transition: "all 0.2s",
             cursor: "pointer",
@@ -124,15 +126,16 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       </div>
 
       <div style={{ flex: "1", minWidth: "150px" }}>
-        <select 
-          value={selectedSuburb} 
+        <select
+          value={selectedSuburb}
           onChange={(e) => setSelectedSuburb(e.target.value)}
           style={{
             padding: "14px 18px",
             borderRadius: "10px",
-            border: "2px solid #e2e8f0",
+            border: "2px solid var(--input-border)",
             fontSize: "16px",
-            backgroundColor: "#fff",
+            backgroundColor: "var(--input-bg)",
+            color: "var(--foreground)",
             boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
             transition: "all 0.2s",
             cursor: "pointer",

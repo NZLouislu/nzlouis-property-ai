@@ -22,7 +22,7 @@ const Properties: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const suburbsForQuery = selectedSuburb ? [selectedSuburb] : undefined;
-  
+
   const {
     data,
     isFetchingNextPage,
@@ -129,7 +129,7 @@ const Properties: React.FC = () => {
           marginBottom: "24px",
           fontSize: "2.5rem",
           fontWeight: "700",
-          color: "#2D3748",
+          color: "var(--text-heading)",
           textAlign: "center",
           background: "linear-gradient(135deg, #007bff, #00bcd4)",
           WebkitBackgroundClip: "text",
@@ -148,9 +148,10 @@ const Properties: React.FC = () => {
           flexWrap: "wrap",
           justifyContent: "center",
           padding: "20px",
-          backgroundColor: "#f8f9fa",
+          backgroundColor: "var(--card-bg)",
           borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+          boxShadow: "var(--shadow)",
+          border: "1px solid var(--card-border)",
         }}
       >
         <div style={{ position: "relative", minWidth: "220px" }}>
@@ -171,10 +172,11 @@ const Properties: React.FC = () => {
             style={{
               padding: "14px 18px 14px 40px",
               borderRadius: "10px",
-              border: "2px solid #e2e8f0",
+              border: "2px solid var(--input-border)",
               fontSize: "16px",
               width: "100%",
-              backgroundColor: "#fff",
+              backgroundColor: "var(--input-bg)",
+              color: "var(--foreground)",
               boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
               transition: "all 0.2s",
             }}
@@ -190,10 +192,11 @@ const Properties: React.FC = () => {
           style={{
             padding: "14px 18px",
             borderRadius: "10px",
-            border: "2px solid #e2e8f0",
+            border: "2px solid var(--input-border)",
             fontSize: "16px",
             minWidth: "220px",
-            backgroundColor: "#fff",
+            backgroundColor: "var(--input-bg)",
+            color: "var(--foreground)",
             boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
             transition: "all 0.2s",
             cursor: "pointer",
@@ -211,10 +214,11 @@ const Properties: React.FC = () => {
             style={{
               padding: "14px 18px",
               borderRadius: "10px",
-              border: "2px solid #e2e8f0",
+              border: "2px solid var(--input-border)",
               fontSize: "16px",
               minWidth: "220px",
-              backgroundColor: "#fff",
+              backgroundColor: "var(--input-bg)",
+              color: "var(--foreground)",
               boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
               transition: "all 0.2s",
               cursor: "pointer",
@@ -242,11 +246,11 @@ const Properties: React.FC = () => {
             <div
               key={index}
               style={{
-                border: "1px solid #e0e0e0",
+                border: "1px solid var(--card-border)",
                 borderRadius: "16px",
                 overflow: "hidden",
-                boxShadow: "0 8px 16px rgba(0,0,0,0.08)",
-                backgroundColor: "#fff",
+                boxShadow: "var(--shadow)",
+                backgroundColor: "var(--card-bg)",
                 height: "400px",
                 transition: "all 0.3s ease",
               }}
@@ -323,11 +327,11 @@ const Properties: React.FC = () => {
                     : null
                 }
                 style={{
-                  border: "1px solid #e2e8f0",
+                  border: "1px solid var(--card-border)",
                   borderRadius: "16px",
                   overflow: "hidden",
-                  boxShadow: "0 8px 16px rgba(0,0,0,0.08)",
-                  backgroundColor: "#fff",
+                  boxShadow: "var(--shadow)",
+                  backgroundColor: "var(--card-bg)",
                   transition: "all 0.3s ease",
                   height: "100%",
                   display: "flex",
@@ -526,7 +530,7 @@ const Properties: React.FC = () => {
                         margin: 0,
                         fontSize: "1.3rem",
                         fontWeight: "700",
-                        color: "#2d3748",
+                        color: "var(--text-heading)",
                         flex: 1,
                         lineHeight: "1.3",
                       }}
@@ -540,7 +544,7 @@ const Properties: React.FC = () => {
                       display: "flex",
                       alignItems: "center",
                       marginBottom: "18px",
-                      color: "#718096",
+                      color: "var(--text-muted)",
                       fontSize: "0.95rem",
                     }}
                   >
@@ -578,7 +582,7 @@ const Properties: React.FC = () => {
                         <span
                           style={{
                             fontWeight: "700",
-                            color: "#2d3748",
+                            color: "var(--text-heading)",
                             fontSize: "1.4rem",
                           }}
                         >
@@ -617,25 +621,24 @@ const Properties: React.FC = () => {
                             property.confidence_score > 0.7
                               ? "#dcfce7"
                               : property.confidence_score > 0.5
-                              ? "#fef9c3"
-                              : "#fee2e2",
+                                ? "#fef9c3"
+                                : "#fee2e2",
                           color:
                             property.confidence_score > 0.7
                               ? "#166534"
                               : property.confidence_score > 0.5
-                              ? "#854d0e"
-                              : "#991b1b",
+                                ? "#854d0e"
+                                : "#991b1b",
                           padding: "6px 12px",
                           borderRadius: "20px",
                           fontSize: "0.85rem",
                           fontWeight: "600",
-                          border: `1px solid ${
-                            property.confidence_score > 0.7
-                              ? "#bbf7d0"
-                              : property.confidence_score > 0.5
+                          border: `1px solid ${property.confidence_score > 0.7
+                            ? "#bbf7d0"
+                            : property.confidence_score > 0.5
                               ? "#fde047"
                               : "#fecaca"
-                          }`,
+                            }`,
                         }}
                       >
                         {Math.round(property.confidence_score * 100)}%
@@ -646,7 +649,7 @@ const Properties: React.FC = () => {
 
                   <div
                     style={{
-                      borderTop: "1px solid #edf2f7",
+                      borderTop: "1px solid var(--card-border)",
                       paddingTop: "20px",
                       marginTop: "auto",
                     }}
@@ -670,14 +673,14 @@ const Properties: React.FC = () => {
                           <FaBed
                             style={{
                               marginRight: "6px",
-                              color: "#718096",
+                              color: "var(--text-muted)",
                               fontSize: "1.1rem",
                             }}
                           />
                           <span
                             style={{
                               fontWeight: "600",
-                              color: "#2d3748",
+                              color: "var(--text-heading)",
                               fontSize: "1.1rem",
                             }}
                           >
@@ -687,7 +690,7 @@ const Properties: React.FC = () => {
                         <div
                           style={{
                             fontSize: "0.8rem",
-                            color: "#718096",
+                            color: "var(--text-muted)",
                             fontWeight: "500",
                           }}
                         >
@@ -707,14 +710,14 @@ const Properties: React.FC = () => {
                           <FaBath
                             style={{
                               marginRight: "6px",
-                              color: "#718096",
+                              color: "var(--text-muted)",
                               fontSize: "1.1rem",
                             }}
                           />
                           <span
                             style={{
                               fontWeight: "600",
-                              color: "#2d3748",
+                              color: "var(--text-heading)",
                               fontSize: "1.1rem",
                             }}
                           >
@@ -724,7 +727,7 @@ const Properties: React.FC = () => {
                         <div
                           style={{
                             fontSize: "0.8rem",
-                            color: "#718096",
+                            color: "var(--text-muted)",
                             fontWeight: "500",
                           }}
                         >
@@ -744,14 +747,14 @@ const Properties: React.FC = () => {
                           <FaCar
                             style={{
                               marginRight: "6px",
-                              color: "#718096",
+                              color: "var(--text-muted)",
                               fontSize: "1.1rem",
                             }}
                           />
                           <span
                             style={{
                               fontWeight: "600",
-                              color: "#2d3748",
+                              color: "var(--text-heading)",
                               fontSize: "1.1rem",
                             }}
                           >
@@ -761,7 +764,7 @@ const Properties: React.FC = () => {
                         <div
                           style={{
                             fontSize: "0.8rem",
-                            color: "#718096",
+                            color: "var(--text-muted)",
                             fontWeight: "500",
                           }}
                         >
@@ -781,14 +784,14 @@ const Properties: React.FC = () => {
                           <FaRulerCombined
                             style={{
                               marginRight: "6px",
-                              color: "#718096",
+                              color: "var(--text-muted)",
                               fontSize: "1.1rem",
                             }}
                           />
                           <span
                             style={{
                               fontWeight: "600",
-                              color: "#2d3748",
+                              color: "var(--text-heading)",
                               fontSize: "1.1rem",
                             }}
                           >
@@ -798,7 +801,7 @@ const Properties: React.FC = () => {
                         <div
                           style={{
                             fontSize: "0.8rem",
-                            color: "#718096",
+                            color: "var(--text-muted)",
                             fontWeight: "500",
                           }}
                         >
